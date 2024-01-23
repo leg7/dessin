@@ -25,7 +25,7 @@
 %code{
     #include <iostream>
     #include <string>
-    
+
     #include "scanner.hh"
     #include "driver.hh"
 
@@ -33,9 +33,17 @@
     #define yylex scanner.yylex
 }
 
-%token                  NL
-%token                  END
-%token <int>            NUMBER
+%token NL
+%token END
+%token <int> NUMBER
+%token CARRE;
+%token RECTANGLE;
+%token TRIANGLE;
+%token CERCLE;
+%token ELLIPSE;
+%token LIGNE;
+%token CHEMIN;
+%token TEXTE;
 
 %type <int>             operation
 %left '-' '+'
@@ -55,14 +63,17 @@ instruction:
         YYACCEPT;
     }
     | affectation {
-      YYACCEPT;
+        YYACCEPT;
     }
 
 expression:
-    operation {
+    declaration
+    | operation {
         //Modifier cette partie pour prendre en compte la structure avec expressions
         std::cout << "#-> " << $1 << std::endl;
     }
+
+declaration:
 
 affectation:
     '=' { std::cout << "Affectation à réaliser" << std::endl;
