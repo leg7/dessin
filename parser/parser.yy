@@ -44,6 +44,7 @@
 %token LIGNE;
 %token CHEMIN;
 %token TEXTE;
+%token STRING;
 
 %type <int>             operation
 %left '-' '+'
@@ -59,12 +60,8 @@ programme:
     }
 
 instruction:
-    expression  {
-        YYACCEPT;
-    }
-    | affectation {
-        YYACCEPT;
-    }
+    expression
+    | affectation
 
 expression:
     declaration
@@ -73,7 +70,21 @@ expression:
         std::cout << "#-> " << $1 << std::endl;
     }
 
+// TODO: Pour chaque forme creer l'objet et l'ajouter dans sa liste correspondante
 declaration:
+        CARRE NUMBER NUMBER NUMBER
+        | RECTANGLE NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER
+        | TRIANGLE NUMBER NUMBER NUMBER NUMBER
+        | CERCLE NUMBER NUMBER NUMBER
+        | ELLIPSE NUMBER NUMBER NUMBER NUMBER
+        | LIGNE NUMBER NUMBER NUMBER NUMBER
+        | CHEMIN chemin_rec
+        | TEXTE NUMBER NUMBER STRING STRING
+
+chemin_rec:
+          NUMBER NUMBER ',' chemin_rec
+          | NUMBER NUMBER
+
 
 affectation:
     '=' { std::cout << "Affectation à réaliser" << std::endl;

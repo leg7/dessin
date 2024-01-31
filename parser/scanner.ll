@@ -28,21 +28,23 @@ NUMBER [0-9]+
 fin return token::END;
 
 
-"+"            return '+';
-"*"            return '*';
-"-"            return '-';
-"/"            return '/';
-"("            return '(';
-")"            return ')';
-"="            return '=';
-(?i:carre)     return token::CARRE;
-(?i:rectangle) return token::RECTANGLE;
-(?i:triangle)  return token::TRIANGLE;
-(?i:cercle)    return token::CERCLE;
-(?i:ellipse)   return token::ELLIPSE;
-(?i:ligne)     return token::LIGNE;
-(?i:chemin)    return token::CHEMIN;
-(?i:texte)     return token::TEXTE;
+"+"               return '+';
+"*"               return '*';
+"-"               return '-';
+"/"               return '/';
+"("               return '(';
+")"               return ')';
+"="               return '=';
+","               return ',';
+(?i:carre)        return token::CARRE;
+(?i:rectangle)    return token::RECTANGLE;
+(?i:triangle)     return token::TRIANGLE;
+(?i:cercle)       return token::CERCLE;
+(?i:ellipse)      return token::ELLIPSE;
+(?i:ligne)        return token::LIGNE;
+(?i:chemin)       return token::CHEMIN;
+(?i:texte)        return token::TEXTE;
+"\"[[:alpha:]]\"" return token::STRING;
 
 
 [0-9]+      {
