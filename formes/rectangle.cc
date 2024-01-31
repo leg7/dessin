@@ -2,9 +2,9 @@
 
 std::string Rectangle::to_svg() const {
     return "<polygon points=\""
-        + coordonnees[0] + ',' + coordonnees[1]
-        + coordonnees[2] + ',' + coordonnees[3]
-        + coordonnees[4] + ',' + coordonnees[5]
-        + coordonnees[6] + ',' + coordonnees[7]
+        + std::to_string(_coordonnees[0]) + ',' + std::to_string(_coordonnees[1]) + ' '
+        + std::to_string(_coordonnees[2]) + ',' + std::to_string(_coordonnees[3]) + ' '
+        + std::to_string(_coordonnees[4]) + ',' + std::to_string(_coordonnees[5]) + ' '
+        + std::to_string(_coordonnees[6]) + ',' + std::to_string(_coordonnees[7])
         + "\">";
 }
