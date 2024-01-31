@@ -12,7 +12,7 @@ find_package(BISON)
 find_package(FLEX)
 
 
-include_directories(parser expressions ${CMAKE_CURRENT_BINARY_DIR})
+include_directories(parser expressions formes ${CMAKE_CURRENT_BINARY_DIR})
 file(GLOB EXPRESSION_HEADERS 
     expressions/contexte.hh
     expressions/expression.hh
@@ -31,6 +31,24 @@ add_library(expressions
     ${EXPRESSION_HEADERS}
     )
 
+file(GLOB FORMES_HEADERS 
+    formes/forme.hh
+    formes/rectangle.hh
+    formes/carre.hh
+    formes/triangle.hh
+    formes/cercle.hh
+    formes/ellipse.hh
+    formes/ligne.hh
+    formes/chemin.hh
+    formes/texte.hh
+    )
+
+add_library(formes 
+    formes/rectangle.cc
+    formes/chemin.cc
+    ${EXPRESSION_HEADERS}
+    )
+
 BISON_TARGET(parser parser/parser.yy ${CMAKE_CURRENT_BINARY_DIR}/parser.cpp VERBOSE ${CMAKE_CURRENT_BINARY_DIR}/automate.txt)
 FLEX_TARGET(scanner parser/scanner.ll  ${CMAKE_CURRENT_BINARY_DIR}/scanner.cpp)
 ADD_FLEX_BISON_DEPENDENCY(scanner parser)
@@ -44,6 +62,7 @@ add_executable(${PROJECT_NAME}
     ${BISON_parser_OUTPUTS}
     ${FLEX_scanner_OUTPUTS}
 )
-target_link_libraries(${PROJECT_NAME} expressions)
+target_link_libraries(${PROJECT_NAME} expressions formes)
 
 target_link_libraries(expressions)
+target_link_libraries(formes)
