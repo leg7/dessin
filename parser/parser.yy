@@ -15,6 +15,7 @@
     #include "constante.hh"
     #include "variable.hh"
     #include "formes_inc.hh"
+    #include "../couleur.hh"
 
     class Scanner;
     class Driver;
@@ -38,6 +39,11 @@
 %token END
 %token <int> NUMBER
 %token FLECHE
+%token COULEUR
+%token <Couleur::Nom> CONSTANTE_COULEUR
+%token <Couleur> RGB
+%token OPACITE
+%token <int> OPACITE_VALEUR
 %token CARRE;
 %token RECTANGLE;
 %token TRIANGLE;
@@ -67,6 +73,7 @@ instruction:
 
 expression:
     declaration
+    | declaration proprietes
     | operation {
         //Modifier cette partie pour prendre en compte la structure avec expressions
         std::cout << "#-> " << $1 << std::endl;
@@ -105,6 +112,23 @@ chemin_rec:
         }
         | /* epsilon */ {
         }
+
+proprietes:
+        FLECHE propriete propriete_esp ';'
+        | '{' propriete propriete_nl '}'
+
+propriete:
+        COULEUR ':' CONSTANTE_COULEUR
+        | COULEUR ':' RGB
+        | OPACITE ':' OPACITE_VALEUR
+
+propriete_esp:
+        '&' propriete propriete_esp
+        | /* epsilon */
+
+propriete_nl:
+        NL propriete propriete_nl
+        | /* epsilon */
 
 affectation:
     '=' { std::cout << "Affectation à réaliser" << std::endl;
