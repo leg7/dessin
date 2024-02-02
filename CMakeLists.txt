@@ -32,6 +32,7 @@ add_library(expressions
     )
 
 file(GLOB FORMES_HEADERS 
+    couleur.hh
     formes/forme.hh
     formes/rectangle.hh
     formes/carre.hh
