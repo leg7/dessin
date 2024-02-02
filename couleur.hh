@@ -11,6 +11,7 @@ class Couleur
                 Vert,
                 Bleu,
                 Jaune,
+                Orange,
                 Violet,
                 Magenta,
                 Cyan,
