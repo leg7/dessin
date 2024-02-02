@@ -45,7 +45,7 @@
 %token LIGNE;
 %token CHEMIN;
 %token TEXTE;
-%token STRING;
+%token <const char*> STRING;
 
 %type <int>             operation
 %left '-' '+'

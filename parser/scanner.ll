@@ -44,7 +44,10 @@ fin return token::END;
 (?i:ligne)        return token::LIGNE;
 (?i:chemin)       return token::CHEMIN;
 (?i:texte)        return token::TEXTE;
-"\"[[:alpha:]]\"" return token::STRING;
+"\"[[:alpha:]]\"" {
+    yylval->build<const char*>(YYText());
+    return token::STRING;
+}
 
 
 [0-9]+      {
