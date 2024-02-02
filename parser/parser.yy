@@ -37,6 +37,7 @@
 %token NL
 %token END
 %token <int> NUMBER
+%token FLECHE
 %token CARRE;
 %token RECTANGLE;
 %token TRIANGLE;

@@ -35,7 +35,7 @@ fin return token::END;
 "("               return '(';
 ")"               return ')';
 "="               return '=';
-","               return ',';
+
 (?i:carre)        return token::CARRE;
 (?i:rectangle)    return token::RECTANGLE;
 (?i:triangle)     return token::TRIANGLE;
@@ -44,11 +44,19 @@ fin return token::END;
 (?i:ligne)        return token::LIGNE;
 (?i:chemin)       return token::CHEMIN;
 (?i:texte)        return token::TEXTE;
+","               return ',';
+
+":"               return ':';
+"&"               return '&';
+";"               return ';';
+"->"              return token::FLECHE;
+"{"               return '{'
+"}"               return '}'
+
 "\"[[:alpha:]]\"" {
     yylval->build<const char*>(YYText());
     return token::STRING;
 }
-
 
 [0-9]+      {
     yylval->build<int>(std::atoi(YYText()));
