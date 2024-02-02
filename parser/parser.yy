@@ -14,6 +14,7 @@
     #include "expressionUnaire.hh"
     #include "constante.hh"
     #include "variable.hh"
+    #include "formes_inc.hh"
 
     class Scanner;
     class Driver;
@@ -72,19 +73,37 @@ expression:
 
 // TODO: Pour chaque forme creer l'objet et l'ajouter dans sa liste correspondante
 declaration:
-        CARRE NUMBER NUMBER NUMBER
-        | RECTANGLE NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER
-        | TRIANGLE NUMBER NUMBER NUMBER NUMBER
-        | CERCLE NUMBER NUMBER NUMBER
-        | ELLIPSE NUMBER NUMBER NUMBER NUMBER
-        | LIGNE NUMBER NUMBER NUMBER NUMBER
-        | CHEMIN chemin_rec
-        | TEXTE NUMBER NUMBER STRING STRING
+        CARRE NUMBER NUMBER NUMBER {
+            driver.ajouterCarre($2, $3, $4);
+        }
+        | RECTANGLE NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
+            driver.ajouterRectangle($2, $3, $4, $5, $6, $7, $8, $9);
+        }
+        | TRIANGLE NUMBER NUMBER NUMBER NUMBER {
+            driver.ajouterTriangle($2, $3, $4, $5);
+        }
+        | CERCLE NUMBER NUMBER NUMBER {
+            driver.ajouterCercle($2, $3, $4);
+        }
+        | ELLIPSE NUMBER NUMBER NUMBER NUMBER {
+            driver.ajouterEllipse($2, $3, $4, $5);
+        }
+        | LIGNE NUMBER NUMBER NUMBER NUMBER {
+            driver.ajouterLigne($2, $3, $4, $5);
+        }
+        | CHEMIN NUMBER NUMBER ',' chemin_rec {
+            driver.ajouterChemin($2, $3);
+        }
+        | TEXTE NUMBER NUMBER STRING STRING {
+            driver.ajouterTexte($2, $3, $4, $5);
+        }
 
 chemin_rec:
-          NUMBER NUMBER ',' chemin_rec
-          | NUMBER NUMBER
-
+        NUMBER NUMBER ',' chemin_rec {
+            driver.cheminContinuer($1, $2);
+        }
+        | /* epsilon */ {
+        }
 
 affectation:
     '=' { std::cout << "Affectation à réaliser" << std::endl;
