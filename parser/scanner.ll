@@ -50,8 +50,8 @@ fin return token::END;
 "&"               return '&';
 ";"               return ';';
 "->"              return token::FLECHE;
-"{"               return '{'
-"}"               return '}'
+"{"               return '{';
+"}"               return '}';
 
 "rouge" {
     yylval->build<Couleur::Nom>(Couleur::Nom::Rouge);
