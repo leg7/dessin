@@ -1,4 +1,5 @@
 #pragma once
+
 #include "forme.hh"
 
 class Rectangle: public Forme {
