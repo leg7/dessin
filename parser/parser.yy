@@ -124,15 +124,15 @@ declaration:
 	| LIGNE NUMBER NUMBER NUMBER NUMBER {
 		driver.ajouterLigne($$, $2, $3, $4, $5);
 	}
-	| CHEMIN NUMBER NUMBER chemin_rec {
-		driver.ajouterChemin($$, $2, $3);
+	| CHEMIN chemin_rec NUMBER NUMBER {
+		driver.ajouterChemin($$, $3, $4);
 	}
 	| TEXTE NUMBER NUMBER STRING STRING {
 		driver.ajouterTexte($$, $2, $3, $4, $5);
 	}
 
 chemin_rec:
-	',' NUMBER NUMBER chemin_rec {
+	chemin_rec NUMBER NUMBER ','  {
 		driver.cheminContinuer($2, $3);
 	}
 	| /* epsilon */ {
