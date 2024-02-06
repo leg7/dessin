@@ -10,6 +10,8 @@ class Driver {
 private:
     Contexte _variables;
 
+    std::map<std::string, Forme*> _variables_formes;
+
     std::vector<Carre> _carres;
     std::vector<Cercle> _cercles;
     std::vector<Chemin> _chemins;
@@ -23,11 +25,15 @@ public:
     Driver();
     ~Driver();
 
-   /* TODO
     const   Contexte& getContexte() const;
     double  getVariable(const std::string& name) const;
     void    setVariable(const std::string& name, double value);
-  */
+
+    const Forme * getForme(std::string const& nom) const;
+    Forme * getForme(std::string const& nom);
+    void setForme(std::string const& nom, Forme * forme);
+    void setForme(std::string const& nom, std::string const& nom2);
+
     void ajouterCarre(int x1, int y1, int taille);
     void ajouterCercle(int x1, int y1, int rayon);
     void ajouterChemin(int x, int y);

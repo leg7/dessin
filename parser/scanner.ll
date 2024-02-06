@@ -53,6 +53,11 @@ fin return token::END;
 "{"               return '{';
 "}"               return '}';
 
+[A-Za-z_][A-Za-z_0-9]* {
+    yylval->build<const char*>(YYText());
+    return token::IDENTIFIANT;
+}
+
 "rouge" {
     yylval->build<Couleur::Nom>(Couleur::Nom::Rouge);
     return token::CONSTANTE_COULEUR;

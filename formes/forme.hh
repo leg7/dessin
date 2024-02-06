@@ -23,3 +23,5 @@ public:
 private:
     Proprietes _prop;
 };
+
+using FormePtr = std::shared_ptr<Forme>;

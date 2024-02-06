@@ -53,6 +53,7 @@
 %token CHEMIN;
 %token TEXTE;
 %token <const char*> STRING;
+%token <const char*> IDENTIFIANT
 
 %type <int>             operation
 %left '-' '+'
@@ -131,7 +132,9 @@ propriete_nl:
         | /* epsilon */
 
 affectation:
-    '=' { std::cout << "Affectation à réaliser" << std::endl;
+    IDENTIFIANT '=' expression {
+        
+        std::cout << "Affectation à réaliser" << std::endl;
     }
 
 operation:
