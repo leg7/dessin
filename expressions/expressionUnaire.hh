@@ -12,7 +12,7 @@ public:
     ExpressionUnaire(ExpressionPtr exp, OperateurUnaire op);
     ~ExpressionUnaire() = default;
 
-    double calculer(const Contexte& contexte) const override;
+    Valeur calculer(const Contexte& contexte) const override;
 
 private:
     ExpressionPtr _exp;

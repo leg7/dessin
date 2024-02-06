@@ -184,8 +184,10 @@ propriete_nl:
 	| /* epsilon */
 
 affectation:
-	'=' { std::cout << "Affectation à réaliser" << std::endl;
-	}
+    IDENTIFIANT '=' expression {
+
+        std::cout << "Affectation à réaliser" << std::endl;
+    }
 
 operation:
 	NUMBER {

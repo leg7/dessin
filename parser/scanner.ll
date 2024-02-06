@@ -62,6 +62,12 @@ fin return token::END;
 	yylval->build<unsigned>(std::strtoul(YYText()+1, nullptr, 16));
 	return token::COULEUR_HEX;
 }
+
+[A-Za-z_][A-Za-z_0-9]* {
+    yylval->build<const char*>(YYText());
+    return token::IDENTIFIANT;
+}
+
 "rouge" {
 	yylval->build<Couleur::Nom>(Couleur::Nom::Rouge);
 	return token::COULEUR_NOM;
