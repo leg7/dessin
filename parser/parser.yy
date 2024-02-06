@@ -23,10 +23,10 @@
 	{
 		uint32_t full;
 		struct {
-				uint8_t b;
-				uint8_t g;
-				uint8_t r;
-				uint8_t _;
+			uint8_t b;
+			uint8_t g;
+			uint8_t r;
+			uint8_t _;
 		} parts;
 	};
 
@@ -75,8 +75,10 @@
 %token <const char*> STRING
 
 %type <int> operation
+%type <Forme::Proprietes> proprietes
 %type <Forme::Proprietes> propriete
 %type <Couleur> couleur
+%type <Forme::Proprietes> declaration
 %left '-' '+'
 %left '*' '/'
 %precedence  NEG
@@ -95,7 +97,9 @@ instruction:
 
 expression:
 	declaration
-	| declaration proprietes
+	| declaration proprietes {
+		$1 = $2;
+	}
 	| operation {
 		//Modifier cette partie pour prendre en compte la structure avec expressions
 		std::cout << "#-> " << $1 << std::endl;
@@ -104,28 +108,28 @@ expression:
 // TODO: Pour chaque forme creer l'objet et l'ajouter dans sa liste correspondante
 declaration:
 	CARRE NUMBER NUMBER NUMBER {
-		driver.ajouterCarre($2, $3, $4);
+		driver.ajouterCarre($$, $2, $3, $4);
 	}
 	| RECTANGLE NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
-		driver.ajouterRectangle($2, $3, $4, $5, $6, $7, $8, $9);
+		driver.ajouterRectangle($$, $2, $3, $4, $5, $6, $7, $8, $9);
 	}
 	| TRIANGLE NUMBER NUMBER NUMBER NUMBER {
-		driver.ajouterTriangle($2, $3, $4, $5);
+		driver.ajouterTriangle($$, $2, $3, $4, $5);
 	}
 	| CERCLE NUMBER NUMBER NUMBER {
-		driver.ajouterCercle($2, $3, $4);
+		driver.ajouterCercle($$, $2, $3, $4);
 	}
 	| ELLIPSE NUMBER NUMBER NUMBER NUMBER {
-		driver.ajouterEllipse($2, $3, $4, $5);
+		driver.ajouterEllipse($$, $2, $3, $4, $5);
 	}
 	| LIGNE NUMBER NUMBER NUMBER NUMBER {
-		driver.ajouterLigne($2, $3, $4, $5);
+		driver.ajouterLigne($$, $2, $3, $4, $5);
 	}
 	| CHEMIN NUMBER NUMBER ',' chemin_rec {
-		driver.ajouterChemin($2, $3);
+		driver.ajouterChemin($$, $2, $3);
 	}
 	| TEXTE NUMBER NUMBER STRING STRING {
-		driver.ajouterTexte($2, $3, $4, $5);
+		driver.ajouterTexte($$, $2, $3, $4, $5);
 	}
 
 chemin_rec:
