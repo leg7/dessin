@@ -57,7 +57,7 @@
 %token COULEUR
 %token COULEUR_RGB
 %token <unsigned> COULEUR_HEX
-%token <Couleur::Nom> COULEUR_NOM
+%token <Couleur> COULEUR_NOM
 
 %token ROTATION
 %token REMPLISSAGE
@@ -105,7 +105,6 @@ expression:
 		std::cout << "#-> " << $1 << std::endl;
 	}
 
-// TODO: Pour chaque forme creer l'objet et l'ajouter dans sa liste correspondante
 declaration:
 	CARRE NUMBER NUMBER NUMBER {
 		driver.ajouterCarre($$, $2, $3, $4);
@@ -125,7 +124,7 @@ declaration:
 	| LIGNE NUMBER NUMBER NUMBER NUMBER {
 		driver.ajouterLigne($$, $2, $3, $4, $5);
 	}
-	| CHEMIN NUMBER NUMBER ',' chemin_rec {
+	| CHEMIN NUMBER NUMBER chemin_rec {
 		driver.ajouterChemin($$, $2, $3);
 	}
 	| TEXTE NUMBER NUMBER STRING STRING {
@@ -133,15 +132,19 @@ declaration:
 	}
 
 chemin_rec:
-	NUMBER NUMBER ',' chemin_rec {
-		driver.cheminContinuer($1, $2);
+	',' NUMBER NUMBER chemin_rec {
+		driver.cheminContinuer($2, $3);
 	}
 	| /* epsilon */ {
 	}
 
 proprietes:
-	FLECHE propriete propriete_esp
-	| '{' propriete propriete_nl '}'
+	FLECHE propriete propriete_esp {
+		$$ = $2; // idem
+	}
+	| '{' propriete propriete_nl '}' {
+		$$ = $2; // TODO: Il faudra changer cette ligne pour que le prop inclu propriete_nl
+	}
 
 propriete:
 	COULEUR ':' couleur {
@@ -169,7 +172,7 @@ couleur:
 	}
 	| COULEUR_HEX {
 		Hextract h { $1 };
-		$$ = Couleur(h.r, h.g, h.b);
+		$$ = Couleur(h.parts.r, h.parts.g, h.parts.b);
 	}
 
 propriete_esp:
