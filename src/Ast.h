@@ -1,3 +1,4 @@
+#pragma once
 #include "instructions/Instruction.h"
 #include <vector>
 #include <memory>

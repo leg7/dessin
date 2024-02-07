@@ -1,3 +1,4 @@
+#pragma once
 #include "Instruction.h"
 #include "expressions/Expression.h"
 #include "../elements/Element.h"

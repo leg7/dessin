@@ -1,3 +1,4 @@
+#pragma once
 #include "Carre.h"
 #include "Cercle.h"
 #include "Chemin.h"
