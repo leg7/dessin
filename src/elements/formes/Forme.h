@@ -1,5 +1,4 @@
 #pragma once
-#pragma once
 
 #include <memory>
 #include <string>
@@ -7,6 +6,7 @@
 #include "../Couleur.h"
 #include "../Element.h"
 
+// TODO: Maybe get rid of the struct and make these object attr
 class Forme: public Element {
 public:
     struct Proprietes {
@@ -18,8 +18,7 @@ public:
     };
 
 public:
-    Forme(Proprietes const& prop): _prop(prop) {}
-
+    Forme(Proprietes const& prop): Element(Type::Forme), _prop(prop) {}
     virtual std::string to_svg() const = 0;
 
 private:

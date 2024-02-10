@@ -34,8 +34,8 @@ class Couleur: public Element
 		  } parts;
 	  };
 
-        Couleur(): _r(0), _g(0), _b(0) {};
-        Couleur(const uint8_t r, const uint8_t g, const uint8_t b): _r(r), _g(g), _b(b) {};
-        Couleur(Nom n);
-	  Couleur(uint32_t hexa);
+        Couleur() noexcept: Element(Type::Couleur), _r(0), _g(0), _b(0) {};
+        Couleur(const uint8_t r, const uint8_t g, const uint8_t b) noexcept: Element(Type::Couleur), _r(r), _g(g), _b(b) {};
+        Couleur(Nom n) noexcept;
+	  Couleur(uint32_t hexa) noexcept;
 };
