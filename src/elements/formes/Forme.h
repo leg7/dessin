@@ -18,7 +18,7 @@ public:
     };
 
 public:
-    Forme(Proprietes const& prop): Element(Type::Forme), _prop(prop) {}
+    Forme(Proprietes const& prop): _prop(prop) {}
     virtual std::string to_svg() const = 0;
 
 private:
