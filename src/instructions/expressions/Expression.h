@@ -1,5 +1,8 @@
 #pragma once
-class Expression
-{
+#include "../Instruction.h"
 
+class Expression: public Instruction
+{
+	public:
+	virtual int calculer() const noexcept = 0;
 };
