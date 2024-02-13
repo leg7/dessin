@@ -12,4 +12,5 @@ class Declaration: public Instruction
 	public:
 	Declaration(std::string nom, Element val): _nom(nom), _val(val) {}
 	void ajouterAuContexte(Contexte &c) const noexcept;
+	virtual void executer() const noexcept override;
 };
