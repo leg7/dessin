@@ -1,7 +1,10 @@
 #pragma once
 
+#include "../elements/Element.h"
+#include <memory>
+
 class Expression
 {
 	public:
-	virtual int calculer() const noexcept = 0;
+	virtual std::shared_ptr<Element> calculer() const noexcept = 0;
 };

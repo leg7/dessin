@@ -2,6 +2,7 @@
 #include "Instruction.h"
 #include "../Contexte.h"
 #include "../expressions/Expression.h"
+#include "../elements/ElementPrimitif.h"
 #include <memory>
 
 class Affectation: public Instruction

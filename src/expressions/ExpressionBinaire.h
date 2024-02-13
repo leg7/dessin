@@ -32,5 +32,5 @@ class ExpressionBinaire: public Expression
 	Expression& operator*(Expression const &e) const;
 	Expression& operator/(Expression const &e) const;
 
-	virtual int calculer() const noexcept override;
+	std::shared_ptr<Element> calculer() const noexcept override;
 };

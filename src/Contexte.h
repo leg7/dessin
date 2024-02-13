@@ -9,6 +9,6 @@ class Contexte
 	std::map<std::string, std::shared_ptr<Element>> data;
 
 	public:
-	bool add(const std::string &nom, const Element &e) noexcept;
+	bool add(const std::string &nom, const std::shared_ptr<Element> &e) noexcept;
 	bool rm(const std::string &nom);
 };

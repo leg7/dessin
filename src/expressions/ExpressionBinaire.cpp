@@ -1,6 +1,7 @@
 #include "ExpressionBinaire.h"
+#include <memory>
 
-int ExpressionBinaire::calculer() const noexcept
+std::shared_ptr<Element> ExpressionBinaire::calculer() const noexcept
 {
 	switch (_op) {
 		case Operation::ADD: return _gauche->calculer() + _droite->calculer();
