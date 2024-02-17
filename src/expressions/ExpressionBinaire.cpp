@@ -1,17 +1,21 @@
 #include "ExpressionBinaire.h"
+#include "../elements/ElementPrimitif.h"
 #include <memory>
 
-std::shared_ptr<Element> ExpressionBinaire::calculer() const noexcept
+std::shared_ptr<Element> ExpressionBinaire::eval() const noexcept
 {
+	double result;
 	switch (_op) {
-		case Operation::ADD: return _gauche->calculer() + _droite->calculer();
-		case Operation::SUB: return _gauche->calculer() - _droite->calculer();
-		case Operation::MUL: return _gauche->calculer() * _droite->calculer();
-		case Operation::DIV: return _gauche->calculer() / _droite->calculer();
-		case Operation::EQ:  return _gauche->calculer() == _droite->calculer();
-		case Operation::GT:  return _gauche->calculer() > _droite->calculer();
-		case Operation::GE:  return _gauche->calculer() >= _droite->calculer();
-		case Operation::LT:  return _gauche->calculer() < _droite->calculer();
-		case Operation::LE:  return _gauche->calculer() <= _droite->calculer();
+		case Operation::ADD: result = _gauche->eval()->toDouble() + _droite->eval()->toDouble(); break;
+		case Operation::SUB: result = _gauche->eval()->toDouble() - _droite->eval()->toDouble(); break;
+		case Operation::MUL: result = _gauche->eval()->toDouble() * _droite->eval()->toDouble(); break;
+		case Operation::DIV: result = _gauche->eval()->toDouble() / _droite->eval()->toDouble(); break;
+		case Operation::EQ:  result = _gauche->eval()->toDouble() == _droite->eval()->toDouble(); break;
+		case Operation::GT:  result = _gauche->eval()->toDouble() > _droite->eval()->toDouble(); break;
+		case Operation::GE:  result = _gauche->eval()->toDouble() >= _droite->eval()->toDouble(); break;
+		case Operation::LT:  result = _gauche->eval()->toDouble() < _droite->eval()->toDouble(); break;
+		case Operation::LE:  result = _gauche->eval()->toDouble() <= _droite->eval()->toDouble();
 	}
+	return std::make_shared<Element>(ElementPrimitif<double>(result));
 }
+

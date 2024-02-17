@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <string>
 
-Couleur::Couleur(Nom n) noexcept: Element(Type::Couleur)
+Couleur::Couleur(Nom n) noexcept
 {
         switch (n) {
                 case Nom::Rouge:   _r = 255; _g = 0;   _b = 0; 	break;
@@ -18,7 +18,7 @@ Couleur::Couleur(Nom n) noexcept: Element(Type::Couleur)
         }
 }
 
-Couleur::Couleur(uint32_t hexa) noexcept: Element(Type::Couleur)
+Couleur::Couleur(uint32_t hexa) noexcept
 {
 	if (hexa > 0xFFFFFF) {
 		exit(69);
@@ -28,4 +28,15 @@ Couleur::Couleur(uint32_t hexa) noexcept: Element(Type::Couleur)
 	_r = h.parts.r;
 	_g = h.parts.g;
 	_b = h.parts.b;
+}
+
+double Couleur::toDouble() const noexcept
+{
+	uint32_t tmp = _r;
+	tmp <<= 8;
+	tmp |= _g;
+	tmp <<= 8;
+	tmp |= _b;
+
+	return static_cast<double>(tmp);
 }

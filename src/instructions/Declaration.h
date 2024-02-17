@@ -6,11 +6,12 @@
 
 class Declaration: public Instruction
 {
+	std::shared_ptr<Contexte> _contexte;
 	std::string _nom;
-	Element _val;
+	std::shared_ptr<Element> _val;
 
 	public:
-	Declaration(std::string nom, Element val): _nom(nom), _val(val) {}
+	Declaration(const std::shared_ptr<Contexte> &contexte, std::string nom, std::shared_ptr<Element> val): _contexte(contexte), _nom(nom), _val(val) {}
 	void ajouterAuContexte(Contexte &c) const noexcept;
 	virtual void executer() const noexcept override;
 };

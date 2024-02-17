@@ -20,6 +20,7 @@ public:
 public:
     Forme(Proprietes const& prop): _prop(prop) {}
     virtual std::string to_svg() const = 0;
+    virtual double toDouble() const noexcept override { return 1.0; }
 
 private:
     Proprietes _prop;

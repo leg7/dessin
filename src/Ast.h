@@ -5,5 +5,7 @@
 
 class Ast
 {
-	std::vector<std::shared_ptr<Instruction>> data;
+	std::vector<std::shared_ptr<Instruction>> _data;
+	public:
+	void executer() const noexcept;
 };

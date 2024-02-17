@@ -10,5 +10,5 @@ class Contexte
 
 	public:
 	bool add(const std::string &nom, const std::shared_ptr<Element> &e) noexcept;
-	bool rm(const std::string &nom);
+	bool rm(const std::string &nom) noexcept;
 };

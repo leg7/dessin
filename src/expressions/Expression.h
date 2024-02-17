@@ -6,5 +6,5 @@
 class Expression
 {
 	public:
-	virtual std::shared_ptr<Element> calculer() const noexcept = 0;
+	virtual std::shared_ptr<Element> eval() const noexcept = 0;
 };

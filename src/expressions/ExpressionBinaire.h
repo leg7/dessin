@@ -22,15 +22,5 @@ class ExpressionBinaire: public Expression
 	public:
 	ExpressionBinaire(const std::shared_ptr<Expression> &gauche, const std::shared_ptr<Expression> &droite, Operation op): _gauche(gauche), _droite(droite), _op(op){}
 
-	Expression& operator==(Expression const &e) const;
-	Expression& operator>(Expression const &e) const;
-	Expression& operator>=(Expression const &e) const;
-	Expression& operator<(Expression const &e) const;
-	Expression& operator<=(Expression const &e) const;
-	Expression& operator+(Expression const &e) const;
-	Expression& operator-(Expression const &e) const;
-	Expression& operator*(Expression const &e) const;
-	Expression& operator/(Expression const &e) const;
-
-	std::shared_ptr<Element> calculer() const noexcept override;
+	std::shared_ptr<Element> eval() const noexcept override;
 };
