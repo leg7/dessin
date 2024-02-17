@@ -1,69 +1,21 @@
+cmake_minimum_required(VERSION 3.10)
 project(dessin)
-cmake_minimum_required(VERSION 3.1.0)
 
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED on)
-set(CMAKE_CXX_EXTENSIONS off)
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-    add_compile_options(-Wall -Wpedantic)
-endif()
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+add_compile_options(-Wall -Wpedantic)
 
 find_package(BISON)
 find_package(FLEX)
+BISON_TARGET(MyParser src/lexer-parser/parser.yy ${CMAKE_CURRENT_BINARY_DIR}/parser.cpp)
+FLEX_TARGET(MyScanner src/lexer-parser/scanner.ll ${CMAKE_CURRENT_BINARY_DIR}/scanner.cpp)
+# Add Bison and Flex generated files to the sources
+set(GENERATED_FILES ${BISON_MyParser_OUTPUTS} ${FLEX_MyScanner_OUTPUTS})
 
+# Collect all source files recursively
+file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.h" "src/*.hpp")
 
-include_directories(parser expressions formes ${CMAKE_CURRENT_BINARY_DIR})
-file(GLOB EXPRESSION_HEADERS 
-    expressions/contexte.hh
-    expressions/expression.hh
-    expressions/expressionBinaire.hh
-    expressions/expressionUnaire.hh
-    expressions/constante.hh
-    expressions/variable.hh
-    )
+# Add the executable target
+add_executable(dessin ${SOURCES} ${GENERATED_FILES})
 
-add_library(expressions 
-    expressions/contexte.cc
-    expressions/expressionBinaire.cc
-    expressions/expressionUnaire.cc
-    expressions/constante.cc
-    expressions/variable.cc
-    ${EXPRESSION_HEADERS}
-    )
-
-file(GLOB FORMES_HEADERS 
-    couleur.hh
-    formes/forme.hh
-    formes/rectangle.hh
-    formes/carre.hh
-    formes/triangle.hh
-    formes/cercle.hh
-    formes/ellipse.hh
-    formes/ligne.hh
-    formes/chemin.hh
-    formes/texte.hh
-    )
-
-add_library(formes 
-    formes/rectangle.cc
-    formes/chemin.cc
-    ${EXPRESSION_HEADERS}
-    )
-
-BISON_TARGET(parser parser/parser.yy ${CMAKE_CURRENT_BINARY_DIR}/parser.cpp VERBOSE ${CMAKE_CURRENT_BINARY_DIR}/automate.txt)
-FLEX_TARGET(scanner parser/scanner.ll  ${CMAKE_CURRENT_BINARY_DIR}/scanner.cpp)
-ADD_FLEX_BISON_DEPENDENCY(scanner parser)
-add_executable(${PROJECT_NAME}
-    parser/main.cc
-    parser/driver.hh
-    parser/driver.cc
-    parser/scanner.hh
-    parser/scanner.ll
-    parser/parser.yy
-    ${BISON_parser_OUTPUTS}
-    ${FLEX_scanner_OUTPUTS}
-)
-target_link_libraries(${PROJECT_NAME} expressions formes)
-
-target_link_libraries(expressions)
-target_link_libraries(formes)
