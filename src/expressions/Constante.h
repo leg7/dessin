@@ -6,6 +6,6 @@ class Constante: public Expression
 {
 	std::shared_ptr<Element> _val;
 	public:
-	Constante(Element val) { _val = std::make_shared<Element>(val); };
+	Constante(std::shared_ptr<Element> val): _val(val) {}
 	virtual std::shared_ptr<Element> eval() const noexcept override { return std::make_shared<Element>(_val); };
 };

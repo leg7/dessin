@@ -8,27 +8,11 @@
 
 %locations
 
-%code requires{
-	#include "contexte.hh"
-	#include "expressionBinaire.hh"
-	#include "expressionUnaire.hh"
-	#include "constante.hh"
-	#include "variable.hh"
-	#include "formes_inc.hh"
-	#include "../couleur.hh"
-	#include <cstdint>
-
-
-	union Hextract
-	{
-		uint32_t full;
-		struct {
-			uint8_t b;
-			uint8_t g;
-			uint8_t r;
-			uint8_t _;
-		} parts;
-	};
+%code requires {
+	#include "Driver.h"
+	#include "../instructions/Instructions.h"
+	#include "../elements/formes/Formes.h"
+	#include <iostream>
 
 	class Scanner;
 	class Driver;
@@ -38,12 +22,6 @@
 %parse-param { Driver &driver }
 
 %code{
-	#include <iostream>
-	#include <string>
-
-	#include "scanner.hh"
-	#include "driver.hh"
-
 	#undef	yylex
 	#define yylex scanner.yylex
 
@@ -78,7 +56,8 @@
 %type <Forme::Proprietes> proprietes
 %type <Forme::Proprietes> propriete
 %type <Couleur> couleur
-%type <Forme::Proprietes> declaration
+%type <Declaration> declaration
+%type <Declaration> declarationSimple
 %left '-' '+'
 %left '*' '/'
 %precedence  NEG
@@ -92,43 +71,44 @@ programme:
 	}
 
 instruction:
-	expression
-	| affectation
-
-expression:
-	declaration
-	| declaration proprietes {
-		$1 = $2;
-	}
-	| operation {
-		//Modifier cette partie pour prendre en compte la structure avec expressions
-		std::cout << "#-> " << $1 << std::endl;
-	}
+	 affectation
+	| appelFonction
+	| boucle
+	| branchement
+	| declaration
 
 declaration:
+	declarationSimple {
+		$$ = $1;
+	}
+	| declarationSimple proprietes {
+	}
+
+// TODO: Construire forme puis l'ajouter au contexte de l'AST
+declarationSimple:
 	CARRE NUMBER NUMBER NUMBER {
-		driver.ajouterCarre($$, $2, $3, $4);
+		$$ = new Declaration(driver.contexteCourant, new Carre($2, $3, $4));
 	}
 	| RECTANGLE NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
-		driver.ajouterRectangle($$, $2, $3, $4, $5, $6, $7, $8, $9);
+		$$ = new Declaration(driver.contexteCourant, new Rectangle($2, $3, $4, $5, $6, $7, $8, $9));
 	}
 	| TRIANGLE NUMBER NUMBER NUMBER NUMBER {
-		driver.ajouterTriangle($$, $2, $3, $4, $5);
+		$$ = new Declaration(driver.contexteCourant, new Triangle($2, $3, $4, $5));
 	}
 	| CERCLE NUMBER NUMBER NUMBER {
-		driver.ajouterCercle($$, $2, $3, $4);
+		$$ = new Declaration(driver.contexteCourant, new Cercle($2, $3, $4));
 	}
 	| ELLIPSE NUMBER NUMBER NUMBER NUMBER {
-		driver.ajouterEllipse($$, $2, $3, $4, $5);
+		$$ = new Declaration(driver.contexteCourant, new Ellipse($2, $3, $4, $5));
 	}
 	| LIGNE NUMBER NUMBER NUMBER NUMBER {
-		driver.ajouterLigne($$, $2, $3, $4, $5);
+		$$ = new Declaration(driver.contexteCourant, new Ligne($2, $3, $4, $5));
 	}
 	| CHEMIN chemin_rec NUMBER NUMBER {
-		driver.ajouterChemin($$, $3, $4);
+		$$ = new Declaration(driver.contexteCourant, new Chemin($3, $4));
 	}
 	| TEXTE NUMBER NUMBER STRING STRING {
-		driver.ajouterTexte($$, $2, $3, $4, $5);
+		$$ = new Declaration(driver.contexteCourant, new Texte($2, $3, $4, $5));
 	}
 
 chemin_rec:
@@ -184,10 +164,17 @@ propriete_nl:
 	| /* epsilon */
 
 affectation:
-    IDENTIFIANT '=' expression {
+    /*IDENTIFIANT '=' expression {
 
         std::cout << "Affectation à réaliser" << std::endl;
-    }
+    }*/
+
+appelFonction:
+
+boucle:
+
+branchement:
+
 
 operation:
 	NUMBER {

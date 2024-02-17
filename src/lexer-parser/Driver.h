@@ -1,9 +1,11 @@
 #pragma once
 
 #include "../Ast.h"
+#include <memory>
 
 class Driver {
 	public:
 	Ast ast;
-	Driver(const Ast &a) noexcept: ast(a) {}
+	std::shared_ptr<Contexte> contexteCourant;
+	Driver(const Ast &a) noexcept: ast(a), contexteCourant(std::make_shared<Contexte>()) {}
 };
