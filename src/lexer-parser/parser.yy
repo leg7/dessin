@@ -53,11 +53,12 @@
 %token <const char*> STRING
 
 %type <int> operation
-%type <Forme::Proprietes> proprietes
-%type <Forme::Proprietes> propriete
+%type <std::shared_ptr<Forme>> proprietes
+%type <std::shared_ptr<Forme>> propriete
 %type <Couleur> couleur
-%type <Declaration> declaration
-%type <Declaration> declarationSimple
+%type <std::shared_ptr<Declaration>> declaration
+%type <std::shared_ptr<Declaration>> declarationSimple
+%type <std::shared_ptr<Chemin> chemin_points
 %left '-' '+'
 %left '*' '/'
 %precedence  NEG
@@ -71,76 +72,88 @@ programme:
 	}
 
 instruction:
-	 affectation
-	| appelFonction
-	| boucle
-	| branchement
-	| declaration
+	 affectation {
+		driver.ast.add($$);
+	}
+	| appelFonction {
+		driver.ast.add($$);
+	}
+	| boucle {
+		driver.ast.add($$);
+	}
+	| branchement {
+		driver.ast.add($$);
+	}
+	| declaration {
+		driver.ast.add($$);
+	}
 
-declaration:
-	declarationSimple {
-		$$ = $1;
-	}
-	| declarationSimple proprietes {
-	}
 
 // TODO: Construire forme puis l'ajouter au contexte de l'AST
-declarationSimple:
-	CARRE NUMBER NUMBER NUMBER {
-		$$ = new Declaration(driver.contexteCourant, new Carre($2, $3, $4));
-	}
-	| RECTANGLE NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
-		$$ = new Declaration(driver.contexteCourant, new Rectangle($2, $3, $4, $5, $6, $7, $8, $9));
-	}
-	| TRIANGLE NUMBER NUMBER NUMBER NUMBER {
-		$$ = new Declaration(driver.contexteCourant, new Triangle($2, $3, $4, $5));
-	}
-	| CERCLE NUMBER NUMBER NUMBER {
-		$$ = new Declaration(driver.contexteCourant, new Cercle($2, $3, $4));
-	}
-	| ELLIPSE NUMBER NUMBER NUMBER NUMBER {
-		$$ = new Declaration(driver.contexteCourant, new Ellipse($2, $3, $4, $5));
-	}
-	| LIGNE NUMBER NUMBER NUMBER NUMBER {
-		$$ = new Declaration(driver.contexteCourant, new Ligne($2, $3, $4, $5));
-	}
-	| CHEMIN chemin_rec NUMBER NUMBER {
-		$$ = new Declaration(driver.contexteCourant, new Chemin($3, $4));
-	}
-	| TEXTE NUMBER NUMBER STRING STRING {
-		$$ = new Declaration(driver.contexteCourant, new Texte($2, $3, $4, $5));
+declaration:
+	forme
+	| forme proprietes {
+		$2 = $1;
 	}
 
-chemin_rec:
-	chemin_rec NUMBER NUMBER ','  {
-		driver.cheminContinuer($2, $3);
+forme:
+	CARRE NUMBER NUMBER NUMBER {
+		$$ = std::make_shared<Declaration>(driver.contexteCourant, std::make_shared<Carre>($2, $3, $4));
 	}
-	| /* epsilon */ {
+	| RECTANGLE NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
+		$$ = std::make_shared<Declaration>(driver.contexteCourant, std::make_shared<Rectangle>($2, $3, $4, $5, $6, $7, $8, $9));
+	}
+	| TRIANGLE NUMBER NUMBER NUMBER NUMBER {
+		$$ = std::make_shared<Declaration>(driver.contexteCourant, std::make_shared<Triangle>($2, $3, $4, $5));
+	}
+	| CERCLE NUMBER NUMBER NUMBER {
+		$$ = std::make_shared<Declaration>(driver.contexteCourant, std::make_shared<Cercle>($2, $3, $4));
+	}
+	| ELLIPSE NUMBER NUMBER NUMBER NUMBER {
+		$$ = std::make_shared<Declaration>(driver.contexteCourant, std::make_shared<Ellipse>($2, $3, $4, $5));
+	}
+	| LIGNE NUMBER NUMBER NUMBER NUMBER {
+		$$ = std::make_shared<Declaration>(driver.contexteCourant, std::make_shared<Ligne>($2, $3, $4, $5));
+	}
+	| CHEMIN chemin_points {
+		$$ = std::make_shared<Declaration>(driver.contexteCourant, $2);
+	}
+	| TEXTE NUMBER NUMBER STRING STRING {
+		$$ = std::make_shared<Declaration>(driver.contexteCourant, std::make_shared<Texte>($2, $3, $4, $5));
+	}
+
+chemin_points:
+	chemin_points ',' NUMBER NUMBER  {
+		$1->ajoutePoint($3, $4);
+		$$ = std::move($1);
+	}
+	| NUMBER NUMBER {
+		$$ = std::make_shared<Chemin>($1, $2);
 	}
 
 proprietes:
-	FLECHE propriete propriete_esp {
-		$$ = $2; // idem
+	FLECHE propriete_esp ';' {
+		$2 = $$; // idem
 	}
-	| '{' propriete propriete_nl '}' {
+	| '{' propriete_nl '}' {
 		$$ = $2; // TODO: Il faudra changer cette ligne pour que le prop inclu propriete_nl
 	}
 
 propriete:
 	COULEUR ':' couleur {
-		$$.couleur = $3;
+		$$->setCouleur($3);
 	}
 	| ROTATION ':' NUMBER {
-		$$.rotation = $3 % 360;
+		$$->setRotation($3 % 360);
 	}
 	| REMPLISSAGE ':' couleur {
-		$$.remplissage = $3;
+		$$->setRemplissage($3);
 	}
 	| OPACITE ':' NUMBER '%' {
-		$$.opacite = $3;
+		$$->setOpacite($3);
 	}
 	| EPAISSEUR ':' NUMBER {
-		$$.epaisseur = $3;
+		$$->setEpaisseur($3);
 	}
 
 couleur:
@@ -156,12 +169,12 @@ couleur:
 	}
 
 propriete_esp:
-	'&' propriete propriete_esp
-	| ';'
+	propriete '&' propriete_esp
+	| propriete
 
 propriete_nl:
-	NL propriete propriete_nl
-	| /* epsilon */
+	propriete_nl NL propriete
+ 	| propriete
 
 affectation:
     /*IDENTIFIANT '=' expression {
