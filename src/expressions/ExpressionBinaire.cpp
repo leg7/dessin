@@ -16,6 +16,6 @@ std::shared_ptr<Element> ExpressionBinaire::eval() const noexcept
 		case Operation::LT:  result = _gauche->eval()->toDouble() < _droite->eval()->toDouble(); break;
 		case Operation::LE:  result = _gauche->eval()->toDouble() <= _droite->eval()->toDouble();
 	}
-	return std::make_shared<Element>(ElementPrimitif<double>(result));
+	return std::make_shared<ElementPrimitif<double>>(result);
 }
 
