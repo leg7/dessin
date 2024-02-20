@@ -7,7 +7,6 @@
 
 class Declaration: public Instruction
 {
-	int nCarres = 0, nRectangles = 0, nTriangles = 0, nCercles = 0, nEllipses = 0, nLignes = 0, nChemins = 0, nTextes = 0;
 	std::string _nom;
 	std::shared_ptr<Element> _val;
 
