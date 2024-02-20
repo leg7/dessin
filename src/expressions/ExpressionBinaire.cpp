@@ -14,4 +14,5 @@ std::shared_ptr<Element> ExpressionBinaire::calculer() const noexcept
 		case Operation::LT:  return _gauche->calculer() < _droite->calculer();
 		case Operation::LE:  return _gauche->calculer() <= _droite->calculer();
 	}
+	return std::make_shared<ElementPrimitif<double>>(result);
 }
