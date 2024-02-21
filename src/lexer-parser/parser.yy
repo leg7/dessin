@@ -16,6 +16,11 @@
 
 	class Scanner;
 	class Driver;
+
+	struct ProprieteData {
+		Forme::TypePropriete type;
+		std::string valeur;
+	};
 }
 
 %parse-param { Scanner &scanner }
@@ -29,18 +34,17 @@
 
 %token NL
 %token END
-%token <int> NUMBER
+%token <int> ENTIER
+%token <float> REEL
 %token FLECHE
 
-%token COULEUR
-%token COULEUR_RGB
-%token <unsigned> COULEUR_HEX
-%token <Couleur> COULEUR_NOM
+%token <std::string> COULEUR
 
-%token ROTATION
-%token REMPLISSAGE
-%token OPACITE
-%token EPAISSEUR
+%token KW_COULEUR
+%token KW_ROTATION
+%token KW_REMPLISSAGE
+%token KW_OPACITE
+%token KW_EPAISSEUR
 
 %token CARRE
 %token RECTANGLE
@@ -52,13 +56,16 @@
 %token TEXTE
 %token <const char*> STRING
 
+%type <std::unique_ptr<Instruction>> instruction
+%type <std::unique_ptr<Declaration>> declaration
+%type <std::unique_ptr<AppelFonction>> appelFonction
+%type <std::vector<std::shared_ptr<Expression>>> arglist
+
 %type <int> operation
-%type <std::shared_ptr<Forme>> proprietes
-%type <std::shared_ptr<Forme>> propriete
-%type <Couleur> couleur
-%type <std::shared_ptr<Declaration>> declaration
-%type <std::shared_ptr<Declaration>> declarationSimple
-%type <std::shared_ptr<Chemin> chemin_points
+%type <std::unique_ptr<Forme>> proplist_esp
+%type <std::unique_ptr<Forme>> proplist_nl
+%type <ProprieteData> propriete
+%type <std::unique_ptr<Chemin>> chemin_points
 %left '-' '+'
 %left '*' '/'
 %precedence  NEG
@@ -85,96 +92,94 @@ instruction:
 		driver.ast.add($$);
 	}
 	| declaration {
-		driver.ast.add($$);
+		driver.ast.add(std::move($$));
 	}
 
 
 // TODO: Construire forme puis l'ajouter au contexte de l'AST
 declaration:
 	forme
-	| forme proprietes {
-		$2 = $1;
+	| proplist_esp ';' {
+		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($1));
+	}
+	| proplist_nl '}' {
+		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($1));
 	}
 
 forme:
 	CARRE NUMBER NUMBER NUMBER {
-		$$ = std::make_shared<Declaration>(driver.contexteCourant, std::make_shared<Carre>($2, $3, $4));
+		$$ = std::make_unique<Carre>($2, $3, $4);
 	}
 	| RECTANGLE NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
-		$$ = std::make_shared<Declaration>(driver.contexteCourant, std::make_shared<Rectangle>($2, $3, $4, $5, $6, $7, $8, $9));
+		$$ = std::make_unique<Rectangle>($2, $3, $4, $5, $6, $7, $8, $9);
 	}
 	| TRIANGLE NUMBER NUMBER NUMBER NUMBER {
-		$$ = std::make_shared<Declaration>(driver.contexteCourant, std::make_shared<Triangle>($2, $3, $4, $5));
+		$$ = std::make_unique<Triangle>($2, $3, $4, $5);
 	}
 	| CERCLE NUMBER NUMBER NUMBER {
-		$$ = std::make_shared<Declaration>(driver.contexteCourant, std::make_shared<Cercle>($2, $3, $4));
+		$$ = std::make_unique<Cercle>($2, $3, $4);
 	}
 	| ELLIPSE NUMBER NUMBER NUMBER NUMBER {
-		$$ = std::make_shared<Declaration>(driver.contexteCourant, std::make_shared<Ellipse>($2, $3, $4, $5));
+		$$ = std::make_unique<Ellipse>($2, $3, $4, $5);
 	}
 	| LIGNE NUMBER NUMBER NUMBER NUMBER {
-		$$ = std::make_shared<Declaration>(driver.contexteCourant, std::make_shared<Ligne>($2, $3, $4, $5));
+		$$ = std::make_unique<Ligne>($2, $3, $4, $5);
 	}
 	| CHEMIN chemin_points {
-		$$ = std::make_shared<Declaration>(driver.contexteCourant, $2);
+		$$ = $2;
 	}
 	| TEXTE NUMBER NUMBER STRING STRING {
-		$$ = std::make_shared<Declaration>(driver.contexteCourant, std::make_shared<Texte>($2, $3, $4, $5));
+		$$ = std::make_unique<Texte>($2, $3, $4, $5);
 	}
 
 chemin_points:
 	chemin_points ',' NUMBER NUMBER  {
-		$1->ajoutePoint($3, $4);
 		$$ = std::move($1);
+		$$->ajoutePoint($3, $4);
 	}
 	| NUMBER NUMBER {
-		$$ = std::make_shared<Chemin>($1, $2);
+		$$ = std::make_unique<Chemin>($1, $2);
 	}
 
-proprietes:
-	FLECHE propriete_esp ';' {
-		$2 = $$; // idem
+proplist_esp:
+	forme FLECHE propriete {
+		$$ = std::move($1);
+		$$->setPropriete($3.type, $3.valeur);
+	} proplist_esp '&' propriete {
+		$$ = std::move($1);
+		$$->setPropriete($3.type, $3.valeur);
 	}
-	| '{' propriete_nl '}' {
-		$$ = $2; // TODO: Il faudra changer cette ligne pour que le prop inclu propriete_nl
+
+proplist_nl:
+	forme '{' propriete {
+		$$ = std::move($1);
+		$$->setPropriete($3.type, $3.valeur);
+	} proplist_nl NL propriete {
+		$$ = std::move($1);
+		$$->setPropriete($3.type, $3.valeur);
 	}
 
 propriete:
-	COULEUR ':' couleur {
-		$$->setCouleur($3);
+	KW_COULEUR ':' COULEUR {
+		$$.type = Forme::TypePropriete::Couleur;
+		$$.valeur = $3;
 	}
-	| ROTATION ':' NUMBER {
-		$$->setRotation($3 % 360);
+	| KW_ROTATION ':' REEL '°' {
+		$$.type = Forme::TypePropriete::Rotation;
+		$$.valeur = std::to_string(mod($3, 360));
 	}
-	| REMPLISSAGE ':' couleur {
-		$$->setRemplissage($3);
+	| KW_REMPLISSAGE ':' COULEUR {
+		$$.type = Forme::TypePropriete::Remplissage;
+		$$.valeur = $3;
 	}
-	| OPACITE ':' NUMBER '%' {
-		$$->setOpacite($3);
+	| KW_OPACITE ':' REEL '%' {
+		$$.type = Forme::TypePropriete::Opacite;
+		$$.valeur = std::to_string($3 * .01f);
 	}
-	| EPAISSEUR ':' NUMBER {
-		$$->setEpaisseur($3);
+	| KW_EPAISSEUR ':' REEL {
+		$$.type = Forme::TypePropriete::Epaisseur;
+		$$.valeur = std::to_string($3);
 	}
-
-couleur:
-	COULEUR_NOM {
-		$$ = Couleur($1);
-	}
-	| COULEUR_RGB NUMBER ',' NUMBER ',' NUMBER ')' {
-		$$ = Couleur($2, $4, $6);
-	}
-	| COULEUR_HEX {
-		Hextract h { $1 };
-		$$ = Couleur(h.parts.r, h.parts.g, h.parts.b);
-	}
-
-propriete_esp:
-	propriete '&' propriete_esp
-	| propriete
-
-propriete_nl:
-	propriete_nl NL propriete
- 	| propriete
 
 affectation:
     /*IDENTIFIANT '=' expression {
@@ -183,10 +188,30 @@ affectation:
     }*/
 
 appelFonction:
+	IDENTIFIANT '(' ')' {
+		$$ = std::make_unique<AppelFonction>(driver.contexteCourant);
+	}
+	IDENTIFIANT '(' arglist ')' {
+		$$ = std::make_unique<AppelFonction>(driver.contexteCourant, $3);
+	}
+arglist:
+	expression {
+		$$ = std::vector<std::shared_ptr<Expression>>(1, std::move($1));
+	}
+	| arglist ',' expression {
+		$$ = std::move($1);
+		$$.push_back(std::move($3));
+	}
 
 boucle:
+	KW_TANTQUE '(' comparaison ')' corps {
+		$$ = std::make_unique<Boucle>(driver.contexteCourant, std::move($3), $5);
+	}
 
 branchement:
+	KW_SI '(' comparaison ')' corps {
+		$$ = std::make_unique<Branchement>(driver.contexteCourant, std::move($3), $5);
+	}
 
 
 operation:
