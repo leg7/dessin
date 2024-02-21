@@ -1,7 +1,7 @@
 %{
-
 #include "scanner.hh"
 #include <cstdlib>
+#include <string>
 
 #define YY_NO_UNISTD_H
 
@@ -18,6 +18,25 @@ using token = yy::Parser::token;
 NUMBER [0-9]+
 HEX "#"[0-9A-Fa-f]{6}
 COMPOSANTE_COULEUR 25[0-5] | 2[0-4][0-9] | 1[0-9][0-9] | [1-9]?[0-9]
+
+/*
+"rgb(" {COMPOSANTE_COULEUR} "," {COMPOSANTE_COULEUR} "," {COMPOSANTE_COULEUR} ")" {
+	yylval->build<std::string>(YYText());
+	return token::COULEUR;
+}
+
+{HEX} {
+	yylval->build<std::string>(YYText);
+	return token::COULEUR;
+}
+
+{NUMBER}? "." {NUMBER} {
+	yylval->build<float>(std::stof(YYText()));
+	return token::REEL;
+}
+*/
+
+
 
 %option c++
 %option yyclass="Scanner"
@@ -62,15 +81,6 @@ fin return token::END;
 "opacite" return token::KW_OPACITE;
 "epaisseur" return token::KW_EPAISSEUR;
 
-"rgb("{COMPOSANTE_COULEUR}","{COMPOSANTE_COULEUR}","{COMPOSANTE_COULEUR}")" {
-	yylval->build<std::string>(YYText());
-	return token::COULEUR;
-}
-{HEX} {
-	yylval->build<std::string>(YYText);
-	return token::COULEUR;
-}
-
 [A-Za-z_][A-Za-z_0-9]* {
     yylval->build<const char*>(YYText());
     return token::IDENTIFIANT;
@@ -103,7 +113,8 @@ fin return token::END;
 	yylval->build<std::string>("black");
 	return token::COULEUR;
 }
-"orange"|"magenta"|"cyan" { yylval->build<std::string>(YYText());
+"orange"|"magenta"|"cyan" {
+	yylval->build<std::string>(YYText());
 	return token::COULEUR;
 }
 
@@ -112,14 +123,9 @@ fin return token::END;
 	return token::STRING;
 }
 
--?{NUMBER} {
+{NUMBER} {
 	yylval->build<int>(std::atoi(YYText()));
 	return token::ENTIER;
-}
-
--?({NUMBER} | {NUMBER}?"."{NUMBER}) {
-	yylval->build<float>(std::stof(YYText()));
-	return REEL;
 }
 
 "\n" {

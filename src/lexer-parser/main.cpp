@@ -1,6 +1,5 @@
-#include "parser.hpp"
-#include "scanner.h"
 #include "Driver.h"
+#include "scanner.hh"
 
 #include <iostream>
 #include <fstream>

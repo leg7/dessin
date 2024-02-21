@@ -1,33 +1,40 @@
 %skeleton "lalr1.cc"
-%require "3.0"
+%require "3.2"
 
 %defines
 %define api.parser.class { Parser }
 %define api.value.type variant
 %define parse.assert
+%language "c++"
 
 %locations
 
 %code requires {
+	#include <memory>
 	#include <iostream>
+
+	#include "../instructions/Instructions.h"
+	#include "../elements/Couleur.h"
+	#include "../elements/formes/Formes.h"
+
 	class Scanner;
 	class Driver;
 
+	/*
 	struct ProprieteData {
 		Forme::TypePropriete type;
 		std::string valeur;
 	};
+	*/
 }
 
 %parse-param { Scanner &scanner }
 %parse-param { Driver &driver }
 
 %code{
-	#include "../elements/Couleur.h"
-	#include "../instructions/Instructions.h"
-	#include "../elements/formes/Formes.h"
 	#include "Driver.h"
-	#include "scanner.h"
+	#include "scanner.hh"
+
 	#undef	yylex
 	#define yylex scanner.yylex
 
@@ -41,11 +48,16 @@
 
 %token <std::string> COULEUR
 
+%token <int> NUMBER
+%token IDENTIFIANT
+
 %token KW_COULEUR
 %token KW_ROTATION
 %token KW_REMPLISSAGE
 %token KW_OPACITE
 %token KW_EPAISSEUR
+%token KW_TANTQUE
+%token KW_SI
 
 %token CARRE
 %token RECTANGLE
@@ -57,14 +69,20 @@
 %token TEXTE
 %token <const char*> STRING
 
-%type <std::unique_ptr<Instruction>> instruction
-%type <std::unique_ptr<Declaration>> declaration
-%type <std::unique_ptr<AppelFonction>> appelFonction
-%type <std::vector<std::shared_ptr<Expression>>> arglist
-
-%type <int> operation
 %type <std::unique_ptr<Forme>> proplist_esp
 %type <std::unique_ptr<Forme>> proplist_nl
+%type <std::unique_ptr<AppelFonction>> appelFonction
+%type <std::vector<std::shared_ptr<Instruction>>> arglist
+
+%type <std::unique_ptr<Boucle>> boucle
+%type <std::unique_ptr<Expression>> expression
+%type <std::unique_ptr<Expression>> comparaison
+%type <std::unique_ptr<Instruction>> instruction
+%type <std::unique_ptr<Declaration>> declaration
+%type <std::unique_ptr<Branchement>> branchement
+%type <std::vector<std::shared_ptr<Instruction>>> corps
+%type <std::unique_ptr<Forme>> forme
+%type <int> operation
 %type <ProprieteData> propriete
 %type <std::unique_ptr<Chemin>> chemin_points
 %left '-' '+'
@@ -80,6 +98,7 @@ programme:
 	}
 
 instruction:
+/*
 	 affectation {
 		driver.ast.add($$);
 	}
@@ -95,11 +114,14 @@ instruction:
 	| declaration {
 		driver.ast.add(std::move($$));
 	}
+*/
 
 
 // TODO: Construire forme puis l'ajouter au contexte de l'AST
 declaration:
-	forme
+	forme {
+		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($1));
+	}
 	| proplist_esp ';' {
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($1));
 	}
@@ -143,6 +165,7 @@ chemin_points:
 	}
 
 proplist_esp:
+/*
 	forme FLECHE propriete {
 		$$ = std::move($1);
 		$$->setPropriete($3.type, $3.valeur);
@@ -150,8 +173,10 @@ proplist_esp:
 		$$ = std::move($1);
 		$$->setPropriete($3.type, $3.valeur);
 	}
+*/
 
 proplist_nl:
+/*
 	forme '{' propriete {
 		$$ = std::move($1);
 		$$->setPropriete($3.type, $3.valeur);
@@ -159,13 +184,14 @@ proplist_nl:
 		$$ = std::move($1);
 		$$->setPropriete($3.type, $3.valeur);
 	}
+*/
 
 propriete:
 	KW_COULEUR ':' COULEUR {
 		$$.type = Forme::TypePropriete::Couleur;
 		$$.valeur = $3;
 	}
-	| KW_ROTATION ':' REEL '°' {
+	| KW_ROTATION ':' REEL {
 		$$.type = Forme::TypePropriete::Rotation;
 		$$.valeur = std::to_string(mod($3, 360));
 	}
@@ -189,12 +215,15 @@ affectation:
     }*/
 
 appelFonction:
+/*
 	IDENTIFIANT '(' ')' {
 		$$ = std::make_unique<AppelFonction>(driver.contexteCourant);
 	}
 	IDENTIFIANT '(' arglist ')' {
 		$$ = std::make_unique<AppelFonction>(driver.contexteCourant, $3);
 	}
+*/
+
 arglist:
 	expression {
 		$$ = std::vector<std::shared_ptr<Expression>>(1, std::move($1));
@@ -214,6 +243,9 @@ branchement:
 		$$ = std::make_unique<Branchement>(driver.contexteCourant, std::move($3), $5);
 	}
 
+expression:
+corps:
+comparaison:
 
 operation:
 	NUMBER {

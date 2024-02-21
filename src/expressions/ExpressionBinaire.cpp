@@ -4,7 +4,7 @@
 
 std::shared_ptr<Element> ExpressionBinaire::eval() const noexcept
 {
-	double result;
+	double result = 0;
 	switch (_op) {
 		case Operation::ADD: result = _gauche->eval()->toDouble() + _droite->eval()->toDouble(); break;
 		case Operation::SUB: result = _gauche->eval()->toDouble() - _droite->eval()->toDouble(); break;
