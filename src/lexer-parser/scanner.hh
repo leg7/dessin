@@ -1,6 +1,4 @@
-#ifndef SCANNER_H
-#define SCANNER_H
-
+#pragma once
 #if ! defined(yyFlexLexerOnce)
 #include <FlexLexer.h>
 #endif
@@ -20,7 +18,7 @@ public:
     using FlexLexer::yylex;
 
     virtual
-    int yylex(  yy::Parser::semantic_type * const lval, 
+    int yylex(  yy::Parser::semantic_type * const lval,
                 yy::Parser::location_type *location );
 
 private:
@@ -28,5 +26,3 @@ private:
 
 };
 
-
-#endif

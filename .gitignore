@@ -1,1 +1,6 @@
 build
+dessin-cc
+src/lexer-parser/parser.hpp
+src/lexer-parser/parser.cpp
+src/lexer-parser/location.hh
+src/lexer-parser/scanner.cpp

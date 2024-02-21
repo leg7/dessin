@@ -1,17 +1,14 @@
 #pragma once
 #include "Instruction.h"
 #include "../Contexte.h"
-#include "../expressions/Expression.h"
-#include "../elements/ElementPrimitif.h"
 #include <memory>
 
 class Affectation: public Instruction
 {
-	std::shared_ptr<Contexte> _contexte;
 	std::string _nom;
-	std::shared_ptr<Expression> _expr;
+	std::shared_ptr<Element> _elem;
 
 	public:
-	Affectation(const std::shared_ptr<Contexte> &contexte, const std::string &nom, const std::shared_ptr<Expression> &expr): _nom(nom), _contexte(contexte), _expr(expr) {}
+	Affectation(const std::shared_ptr<Contexte> &contexte, const std::string &nom, const std::shared_ptr<Element> &elem) noexcept: Instruction(contexte), _nom(nom), _elem(elem) {}
 	virtual void executer() const noexcept override;
 };

@@ -1,48 +1,39 @@
 %skeleton "lalr1.cc"
-%require "3.0"
+%require "3.2"
 
 %defines
 %define api.parser.class { Parser }
 %define api.value.type variant
 %define parse.assert
+%language "c++"
 
 %locations
 
-%code requires{
-	#include "contexte.hh"
-	#include "expressionBinaire.hh"
-	#include "expressionUnaire.hh"
-	#include "constante.hh"
-	#include "variable.hh"
-	#include "formes_inc.hh"
-	#include "../couleur.hh"
-	#include <cstdint>
+%code requires {
+	#include <memory>
+	#include <iostream>
 
-
-	union Hextract
-	{
-		uint32_t full;
-		struct {
-			uint8_t b;
-			uint8_t g;
-			uint8_t r;
-			uint8_t _;
-		} parts;
-	};
+	#include "../instructions/Instructions.h"
+	#include "../elements/Couleur.h"
+	#include "../elements/formes/Formes.h"
 
 	class Scanner;
 	class Driver;
+
+	/*
+	struct ProprieteData {
+		Forme::TypePropriete type;
+		std::string valeur;
+	};
+	*/
 }
 
 %parse-param { Scanner &scanner }
 %parse-param { Driver &driver }
 
 %code{
-	#include <iostream>
-	#include <string>
-
+	#include "Driver.h"
 	#include "scanner.hh"
-	#include "driver.hh"
 
 	#undef	yylex
 	#define yylex scanner.yylex
@@ -51,18 +42,22 @@
 
 %token NL
 %token END
-%token <int> NUMBER
+%token <int> ENTIER
+%token <float> REEL
 %token FLECHE
 
-%token COULEUR
-%token COULEUR_RGB
-%token <unsigned> COULEUR_HEX
-%token <Couleur> COULEUR_NOM
+%token <std::string> COULEUR
 
-%token ROTATION
-%token REMPLISSAGE
-%token OPACITE
-%token EPAISSEUR
+%token <int> NUMBER
+%token IDENTIFIANT
+
+%token KW_COULEUR
+%token KW_ROTATION
+%token KW_REMPLISSAGE
+%token KW_OPACITE
+%token KW_EPAISSEUR
+%token KW_TANTQUE
+%token KW_SI
 
 %token CARRE
 %token RECTANGLE
@@ -74,11 +69,22 @@
 %token TEXTE
 %token <const char*> STRING
 
+%type <std::unique_ptr<Forme>> proplist_esp
+%type <std::unique_ptr<Forme>> proplist_nl
+%type <std::unique_ptr<AppelFonction>> appelFonction
+%type <std::vector<std::shared_ptr<Instruction>>> arglist
+
+%type <std::unique_ptr<Boucle>> boucle
+%type <std::unique_ptr<Expression>> expression
+%type <std::unique_ptr<Expression>> comparaison
+%type <std::unique_ptr<Instruction>> instruction
+%type <std::unique_ptr<Declaration>> declaration
+%type <std::unique_ptr<Branchement>> branchement
+%type <std::vector<std::shared_ptr<Instruction>>> corps
+%type <std::unique_ptr<Forme>> forme
 %type <int> operation
-%type <Forme::Proprietes> proprietes
-%type <Forme::Proprietes> propriete
-%type <Couleur> couleur
-%type <Forme::Proprietes> declaration
+%type <ProprieteData> propriete
+%type <std::unique_ptr<Chemin>> chemin_points
 %left '-' '+'
 %left '*' '/'
 %precedence  NEG
@@ -92,102 +98,154 @@ programme:
 	}
 
 instruction:
-	expression
-	| affectation
-
-expression:
-	declaration
-	| declaration proprietes {
-		$1 = $2;
+/*
+	 affectation {
+		driver.ast.add($$);
 	}
-	| operation {
-		//Modifier cette partie pour prendre en compte la structure avec expressions
-		std::cout << "#-> " << $1 << std::endl;
+	| appelFonction {
+		driver.ast.add($$);
 	}
+	| boucle {
+		driver.ast.add($$);
+	}
+	| branchement {
+		driver.ast.add($$);
+	}
+	| declaration {
+		driver.ast.add(std::move($$));
+	}
+*/
 
+
+// TODO: Construire forme puis l'ajouter au contexte de l'AST
 declaration:
+	forme {
+		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($1));
+	}
+	| proplist_esp ';' {
+		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($1));
+	}
+	| proplist_nl '}' {
+		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($1));
+	}
+
+forme:
 	CARRE NUMBER NUMBER NUMBER {
-		driver.ajouterCarre($$, $2, $3, $4);
+		$$ = std::make_unique<Carre>($2, $3, $4);
 	}
 	| RECTANGLE NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
-		driver.ajouterRectangle($$, $2, $3, $4, $5, $6, $7, $8, $9);
+		$$ = std::make_unique<Rectangle>($2, $3, $4, $5, $6, $7, $8, $9);
 	}
 	| TRIANGLE NUMBER NUMBER NUMBER NUMBER {
-		driver.ajouterTriangle($$, $2, $3, $4, $5);
+		$$ = std::make_unique<Triangle>($2, $3, $4, $5);
 	}
 	| CERCLE NUMBER NUMBER NUMBER {
-		driver.ajouterCercle($$, $2, $3, $4);
+		$$ = std::make_unique<Cercle>($2, $3, $4);
 	}
 	| ELLIPSE NUMBER NUMBER NUMBER NUMBER {
-		driver.ajouterEllipse($$, $2, $3, $4, $5);
+		$$ = std::make_unique<Ellipse>($2, $3, $4, $5);
 	}
 	| LIGNE NUMBER NUMBER NUMBER NUMBER {
-		driver.ajouterLigne($$, $2, $3, $4, $5);
+		$$ = std::make_unique<Ligne>($2, $3, $4, $5);
 	}
-	| CHEMIN chemin_rec NUMBER NUMBER {
-		driver.ajouterChemin($$, $3, $4);
+	| CHEMIN chemin_points {
+		$$ = $2;
 	}
 	| TEXTE NUMBER NUMBER STRING STRING {
-		driver.ajouterTexte($$, $2, $3, $4, $5);
+		$$ = std::make_unique<Texte>($2, $3, $4, $5);
 	}
 
-chemin_rec:
-	chemin_rec NUMBER NUMBER ','  {
-		driver.cheminContinuer($2, $3);
+chemin_points:
+	chemin_points ',' NUMBER NUMBER  {
+		$$ = std::move($1);
+		$$->ajoutePoint($3, $4);
 	}
-	| /* epsilon */ {
+	| NUMBER NUMBER {
+		$$ = std::make_unique<Chemin>($1, $2);
 	}
 
-proprietes:
-	FLECHE propriete propriete_esp {
-		$$ = $2; // idem
+proplist_esp:
+/*
+	forme FLECHE propriete {
+		$$ = std::move($1);
+		$$->setPropriete($3.type, $3.valeur);
+	} proplist_esp '&' propriete {
+		$$ = std::move($1);
+		$$->setPropriete($3.type, $3.valeur);
 	}
-	| '{' propriete propriete_nl '}' {
-		$$ = $2; // TODO: Il faudra changer cette ligne pour que le prop inclu propriete_nl
+*/
+
+proplist_nl:
+/*
+	forme '{' propriete {
+		$$ = std::move($1);
+		$$->setPropriete($3.type, $3.valeur);
+	} proplist_nl NL propriete {
+		$$ = std::move($1);
+		$$->setPropriete($3.type, $3.valeur);
 	}
+*/
 
 propriete:
-	COULEUR ':' couleur {
-		$$.couleur = $3;
+	KW_COULEUR ':' COULEUR {
+		$$.type = Forme::TypePropriete::Couleur;
+		$$.valeur = $3;
 	}
-	| ROTATION ':' NUMBER {
-		$$.rotation = $3 % 360;
+	| KW_ROTATION ':' REEL {
+		$$.type = Forme::TypePropriete::Rotation;
+		$$.valeur = std::to_string(mod($3, 360));
 	}
-	| REMPLISSAGE ':' couleur {
-		$$.remplissage = $3;
+	| KW_REMPLISSAGE ':' COULEUR {
+		$$.type = Forme::TypePropriete::Remplissage;
+		$$.valeur = $3;
 	}
-	| OPACITE ':' NUMBER '%' {
-		$$.opacite = $3;
+	| KW_OPACITE ':' REEL '%' {
+		$$.type = Forme::TypePropriete::Opacite;
+		$$.valeur = std::to_string($3 * .01f);
 	}
-	| EPAISSEUR ':' NUMBER {
-		$$.epaisseur = $3;
+	| KW_EPAISSEUR ':' REEL {
+		$$.type = Forme::TypePropriete::Epaisseur;
+		$$.valeur = std::to_string($3);
 	}
-
-couleur:
-	COULEUR_NOM {
-		$$ = Couleur($1);
-	}
-	| COULEUR_RGB NUMBER ',' NUMBER ',' NUMBER ')' {
-		$$ = Couleur($2, $4, $6);
-	}
-	| COULEUR_HEX {
-		Hextract h { $1 };
-		$$ = Couleur(h.parts.r, h.parts.g, h.parts.b);
-	}
-
-propriete_esp:
-	'&' propriete propriete_esp
-	| ';'
-
-propriete_nl:
-	NL propriete propriete_nl
-	| /* epsilon */
 
 affectation:
-    IDENTIFIANT '=' expression {
+    /*IDENTIFIANT '=' expression {
 
         std::cout << "Affectation à réaliser" << std::endl;
-    }
+    }*/
+
+appelFonction:
+/*
+	IDENTIFIANT '(' ')' {
+		$$ = std::make_unique<AppelFonction>(driver.contexteCourant);
+	}
+	IDENTIFIANT '(' arglist ')' {
+		$$ = std::make_unique<AppelFonction>(driver.contexteCourant, $3);
+	}
+*/
+
+arglist:
+	expression {
+		$$ = std::vector<std::shared_ptr<Expression>>(1, std::move($1));
+	}
+	| arglist ',' expression {
+		$$ = std::move($1);
+		$$.push_back(std::move($3));
+	}
+
+boucle:
+	KW_TANTQUE '(' comparaison ')' corps {
+		$$ = std::make_unique<Boucle>(driver.contexteCourant, std::move($3), $5);
+	}
+
+branchement:
+	KW_SI '(' comparaison ')' corps {
+		$$ = std::make_unique<Branchement>(driver.contexteCourant, std::move($3), $5);
+	}
+
+expression:
+corps:
+comparaison:
 
 operation:
 	NUMBER {

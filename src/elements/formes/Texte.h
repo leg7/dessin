@@ -6,9 +6,8 @@
 
 class Texte: public Forme {
 public:
-    Texte(Proprietes prop, int x1, int y1, std::string const& texte, std::string const& police)
-        : Forme(prop), _x1(x1), _y1(y1), _texte(texte), _police(police)
-    {}
+    Texte(int x1, int y1, std::string const& texte, std::string const& police) : _x1(x1), _y1(y1), _texte(texte), _police(police) {}
+    Texte(Proprietes prop, int x1, int y1, std::string const& texte, std::string const& police) : Forme(prop), _x1(x1), _y1(y1), _texte(texte), _police(police) {}
 
     std::string to_svg() const override { return ""; }
 
