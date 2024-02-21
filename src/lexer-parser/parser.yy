@@ -163,26 +163,24 @@ chemin_points:
 	}
 
 proplist_esp:
-/*
 	forme FLECHE propriete {
 		$$ = std::move($1);
 		$$->setPropriete($3.type, $3.valeur);
-	} proplist_esp '&' propriete {
+	}
+	| proplist_esp '&' propriete {
 		$$ = std::move($1);
 		$$->setPropriete($3.type, $3.valeur);
 	}
-*/
 
 proplist_nl:
-/*
 	forme '{' propriete {
 		$$ = std::move($1);
 		$$->setPropriete($3.type, $3.valeur);
-	} proplist_nl NL propriete {
+	}
+	| proplist_nl NL propriete {
 		$$ = std::move($1);
 		$$->setPropriete($3.type, $3.valeur);
 	}
-*/
 
 propriete:
 	KW_COULEUR ':' COULEUR {
