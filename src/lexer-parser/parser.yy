@@ -54,7 +54,7 @@
 %token <float> REEL
 %token FLECHE
 
-%token <std::string> COULEUR
+%token <Couleur> COULEUR
 
 %token <int> NUMBER
 %token IDENTIFIANT
@@ -77,8 +77,13 @@
 %token TEXTE
 %token <const char*> STRING
 
-%type <std::unique_ptr<Forme>> proplist_esp
-%type <std::unique_ptr<Forme>> proplist_nl
+%type <std::unique_ptr<Declaration>> declaration
+%type <std::unique_ptr<Forme>> forme
+// Forme::Proprietes Sythetise
+%type <std::unique_ptr<Forme::Proprietes>> proplist_esp
+%type <std::unique_ptr<Forme::Proprietes>> proplist_nl
+%type <std::unique_ptr<Forme::Proprietes>> propriete
+
 %type <std::unique_ptr<AppelFonction>> appelFonction
 %type <std::vector<std::shared_ptr<Instruction>>> arglist
 
@@ -86,12 +91,9 @@
 %type <std::unique_ptr<Expression>> expression
 %type <std::unique_ptr<Expression>> comparaison
 %type <std::unique_ptr<Instruction>> instruction
-%type <std::unique_ptr<Declaration>> declaration
 %type <std::unique_ptr<Branchement>> branchement
 %type <std::vector<std::shared_ptr<Instruction>>> corps
-%type <std::unique_ptr<Forme>> forme
 %type <int> operation
-%type <ProprieteData> propriete
 %type <std::unique_ptr<Chemin>> chemin_points
 %left '-' '+'
 %left '*' '/'
@@ -119,21 +121,21 @@ instruction:
 	| branchement {
 		driver.ast.add($$);
 	}
-	| declaration {
+*/
+	declaration {
 		driver.ast.add(std::move($$));
 	}
-*/
 
-
-// TODO: Construire forme puis l'ajouter au contexte de l'AST
 declaration:
 	forme {
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($1));
 	}
-	| proplist_esp ';' {
+	| forme FLECHE proplist_esp ';' {
+		$1->setProprietes(*$3);
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($1));
 	}
-	| proplist_nl '}' {
+	| forme '{' proplist_nl '}' {
+		$1->setProprietes(*$3);
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($1));
 	}
 
@@ -157,7 +159,7 @@ forme:
 		$$ = std::make_unique<Ligne>($2, $3, $4, $5);
 	}
 	| CHEMIN chemin_points {
-		$$ = $2;
+		$$ = std::move($2);
 	}
 	| TEXTE NUMBER NUMBER STRING STRING {
 		$$ = std::make_unique<Texte>($2, $3, $4, $5);
@@ -173,47 +175,36 @@ chemin_points:
 	}
 
 proplist_esp:
-/*
-	forme FLECHE propriete {
-		$$ = std::move($1);
-		$$->setPropriete($3.type, $3.valeur);
-	} proplist_esp '&' propriete {
-		$$ = std::move($1);
-		$$->setPropriete($3.type, $3.valeur);
+	propriete {
+		$1 = std::move($$);
 	}
-*/
+	| propriete '&' proplist_esp {
+		$1 = std::move($$);
+	}
 
 proplist_nl:
-/*
-	forme '{' propriete {
-		$$ = std::move($1);
-		$$->setPropriete($3.type, $3.valeur);
-	} proplist_nl NL propriete {
-		$$ = std::move($1);
-		$$->setPropriete($3.type, $3.valeur);
+	propriete {
+		$1 = std::move($$);
 	}
-*/
+	| propriete NL proplist_nl {
+		$1 = std::move($$);
+	}
 
 propriete:
 	KW_COULEUR ':' COULEUR {
-		$$.type = Forme::TypePropriete::Couleur;
-		$$.valeur = $3;
+		$$->couleur = $3;
 	}
 	| KW_ROTATION ':' REEL {
-		$$.type = Forme::TypePropriete::Rotation;
-		$$.valeur = std::to_string(mod($3, 360));
+		$$->rotation = fmod($3, 360.0f);
 	}
 	| KW_REMPLISSAGE ':' COULEUR {
-		$$.type = Forme::TypePropriete::Remplissage;
-		$$.valeur = $3;
+		$$->remplissage = $3;
 	}
 	| KW_OPACITE ':' REEL '%' {
-		$$.type = Forme::TypePropriete::Opacite;
-		$$.valeur = std::to_string($3 * .01f);
+		$$->opacite = $3 * .01f;
 	}
 	| KW_EPAISSEUR ':' REEL {
-		$$.type = Forme::TypePropriete::Epaisseur;
-		$$.valeur = std::to_string($3);
+		$$->epaisseur = $3;
 	}
 
 affectation:

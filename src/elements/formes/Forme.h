@@ -13,15 +13,18 @@ public:
         Couleur couleur;
         Couleur remplissage;
         uint8_t opacite = 0;
-        uint16_t rotation = 0;
+        float rotation = 0;
         uint16_t epaisseur = 0;
     };
 
 public:
     Forme();
     Forme(Proprietes const& prop): _prop(prop) {}
+
     virtual std::string to_svg() const = 0;
     virtual double toDouble() const noexcept override { return 1.0; }
+
+    void setProprietes(const Proprietes &p) noexcept { _prop = p; };
 
 private:
     Proprietes _prop;

@@ -2,6 +2,7 @@
 #include "Instruction.h"
 #include "../elements/Element.h"
 #include "../Contexte.h"
+#include <memory>
 #include <string>
 #include "../elements/formes/Carre.h"
 #include "../elements/formes/Cercle.h"

@@ -45,3 +45,4 @@ Declaration::Declaration(const std::shared_ptr<Contexte> &contexte, const std::s
 	_nom = "texte[" + std::to_string(contexte->nTextes++) + "]";
 	_val = e;
 }
+
