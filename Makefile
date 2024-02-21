@@ -2,8 +2,9 @@ CXX := g++
 
 SRCDIR := src
 BUILD_DIR := build
+EXECUTABLE := dessin-cc
 
-CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic
+CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -O2 -flto
 
 BISON_OUTPUT := $(SRCDIR)/lexer-parser/parser.cpp $(SRCDIR)/lexer-parser/parser.hpp $(SRCDIR)/lexer-parser/location.hh
 FLEX_OUTPUT := $(SRCDIR)/lexer-parser/scanner.cpp
@@ -20,7 +21,7 @@ OBJECTS := $(patsubst $(SRCDIR)/%.cpp, $(BUILD_DIR)/%.o, $(SOURCES))
 
 .PHONY: all clean
 
-all: dessin-cc
+all: $(EXECUTABLE) $(SOURCES) $(HEADERS)
 
 $(BUILD_DIR)/%.o: $(SRCDIR)/%.cpp $(HEADERS)
 	@mkdir -p $(@D)
@@ -32,8 +33,8 @@ $(BISON_OUTPUT): $(SRCDIR)/lexer-parser/parser.yy
 $(FLEX_OUTPUT): $(SRCDIR)/lexer-parser/scanner.ll
 	flex --c++ -o $(SRCDIR)/lexer-parser/scanner.cpp $<
 
-dessin-cc: $(BISON_OUTPUT) $(FLEX_OUTPUT) $(OBJECTS)
+$(EXECUTABLE): $(BISON_OUTPUT) $(FLEX_OUTPUT) $(OBJECTS)
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJECTS)
 
 clean:
-	$(RM) -r $(BUILD_DIR) $(BISON_OUTPUT) $(FLEX_OUTPUT)
+	$(RM) -r $(EXECUTABLE) $(BUILD_DIR) $(BISON_OUTPUT) $(FLEX_OUTPUT)
