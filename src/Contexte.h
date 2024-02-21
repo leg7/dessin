@@ -7,10 +7,10 @@
 
 class Contexte
 {
-	int nCarres = 0, nRectangles = 0, nTriangles = 0, nCercles = 0, nEllipses = 0, nLignes = 0, nChemins = 0, nTextes = 0;
 	std::map<std::string, std::shared_ptr<Element>> _data;
 
 	public:
+	int nCarres = 0, nRectangles = 0, nTriangles = 0, nCercles = 0, nEllipses = 0, nLignes = 0, nChemins = 0, nTextes = 0;
 	bool add(const std::string &nom, const std::shared_ptr<Element> &e) noexcept;
 	bool rm(const std::string &nom) noexcept;
 

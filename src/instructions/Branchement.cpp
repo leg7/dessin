@@ -5,11 +5,11 @@ void Branchement::executer() const noexcept
 {
 	if (_condition->eval()->toDouble()) {
 		for (const auto &it: _then) {
-			it.executer();
+			it->executer();
 		}
 	} else {
 		for (const auto &it: _else) {
-			it.executer();
+			it->executer();
 		}
 	}
 }

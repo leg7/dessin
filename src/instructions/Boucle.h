@@ -7,11 +7,11 @@
 class Boucle: public Instruction
 {
 	std::shared_ptr<Expression> _condition;
-	std::vector<Instruction> _then;
+	std::vector<std::shared_ptr<Instruction>> _then;
 	public:
 	Boucle(const std::shared_ptr<Contexte> &c,
 		const std::shared_ptr<Expression> &cond,
-		const std::vector<Instruction> &then) noexcept:
+		const std::vector<std::shared_ptr<Instruction>> &then) noexcept:
 			Instruction(c), _condition(cond), _then(then) {}
 
 	virtual void executer() const noexcept override;

@@ -9,11 +9,7 @@
 %locations
 
 %code requires {
-	#include "Driver.h"
-	#include "../instructions/Instructions.h"
-	#include "../elements/formes/Formes.h"
 	#include <iostream>
-
 	class Scanner;
 	class Driver;
 
@@ -27,6 +23,11 @@
 %parse-param { Driver &driver }
 
 %code{
+	#include "../elements/Couleur.h"
+	#include "../instructions/Instructions.h"
+	#include "../elements/formes/Formes.h"
+	#include "Driver.h"
+	#include "scanner.h"
 	#undef	yylex
 	#define yylex scanner.yylex
 

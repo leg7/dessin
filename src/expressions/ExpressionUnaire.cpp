@@ -9,6 +9,6 @@ std::shared_ptr<Element> ExpressionUnaire::eval() const noexcept
 		case Operation::MIN: result = -_operande->eval()->toDouble(); break;
 		case Operation::NOOP: result = _operande->eval()->toDouble();
 	}
-	return std::make_shared<Element>(ElementPrimitif<double>(result));
+	return std::make_shared<ElementPrimitif<double>>(result);
 }
 
