@@ -109,10 +109,10 @@ instruction:
 	| branchement {
 		driver.ast.add($$);
 	}
-	| declaration {
+*/
+	declaration {
 		driver.ast.add(std::move($$));
 	}
-*/
 
 
 // TODO: Construire forme puis l'ajouter au contexte de l'AST
