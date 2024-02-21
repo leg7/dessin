@@ -13,19 +13,17 @@
 	#include <memory>
 	#include <iostream>
 
-	#include "../instructions/Instructions.h"
-	#include "../elements/Couleur.h"
-	#include "../elements/formes/Formes.h"
+	#include "instructions/Instructions.h"
+	#include "elements/Couleur.h"
+	#include "elements/formes/Formes.h"
 
 	class Scanner;
 	class Driver;
 
-	/*
 	struct ProprieteData {
 		Forme::TypePropriete type;
 		std::string valeur;
 	};
-	*/
 }
 
 %parse-param { Scanner &scanner }

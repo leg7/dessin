@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Ast.h"
+#include "Ast.h"
 #include <memory>
 
 class Driver {

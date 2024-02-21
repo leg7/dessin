@@ -17,6 +17,14 @@ public:
         uint16_t epaisseur = 0;
     };
 
+	enum class TypePropriete {
+		Couleur,
+		Rotation,
+		Remplissage,
+		Opacite,
+		Epaisseur
+	};
+
 public:
     Forme();
     Forme(Proprietes const& prop): _prop(prop) {}

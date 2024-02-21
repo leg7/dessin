@@ -81,39 +81,34 @@ fin return token::END;
 "opacite" return token::KW_OPACITE;
 "epaisseur" return token::KW_EPAISSEUR;
 
-[A-Za-z_][A-Za-z_0-9]* {
-    yylval->build<const char*>(YYText());
-    return token::IDENTIFIANT;
-}
-
-"rouge" {
+rouge {
 	yylval->build<std::string>("red");
 	return token::COULEUR;
 }
-"vert" {
+vert {
 	yylval->build<std::string>("green");
 	return token::COULEUR;
 }
-"bleu" {
+bleu {
 	yylval->build<std::string>("blue");
 	return token::COULEUR;
 }
-"jaune" {
+jaune {
 	yylval->build<std::string>("yellow");
 	return token::COULEUR;
 }
-"violet" { yylval->build<std::string>("purple");
+violet { yylval->build<std::string>("purple");
 	return token::COULEUR;
 }
-"blanc" {
+blanc {
 	yylval->build<std::string>("white");
 	return token::COULEUR;
 }
-"noir" {
+noir {
 	yylval->build<std::string>("black");
 	return token::COULEUR;
 }
-"orange"|"magenta"|"cyan" {
+orange|magenta|cyan {
 	yylval->build<std::string>(YYText());
 	return token::COULEUR;
 }
@@ -126,6 +121,11 @@ fin return token::END;
 {NUMBER} {
 	yylval->build<int>(std::atoi(YYText()));
 	return token::ENTIER;
+}
+
+[A-Za-z_][A-Za-z_0-9]* {
+    yylval->build<const char*>(YYText());
+    return token::IDENTIFIANT;
 }
 
 "\n" {
