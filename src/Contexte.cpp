@@ -1,6 +1,4 @@
 #include "Contexte.h"
-#include "elements/formes/Formes.h"
-#include "elements/formes/Carre.h"
 #include <memory>
 
 bool Contexte::add(const std::string &nom, const std::shared_ptr<Element> &e) noexcept

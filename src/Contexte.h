@@ -3,7 +3,14 @@
 #include <string>
 #include <memory>
 #include "elements/Element.h"
-#include "elements/formes/Formes.h"
+#include "elements/formes/Carre.h"
+#include "elements/formes/Cercle.h"
+#include "elements/formes/Chemin.h"
+#include "elements/formes/Ellipse.h"
+#include "elements/formes/Ligne.h"
+#include "elements/formes/Rectangle.h"
+#include "elements/formes/Texte.h"
+#include "elements/formes/Triangle.h"
 
 class Contexte
 {
@@ -23,3 +30,4 @@ class Contexte
 	std::shared_ptr<Chemin> getChemin(const int i) const noexcept;
 	std::shared_ptr<Texte> getTexte(const int i) const noexcept;
 };
+

@@ -12,20 +12,28 @@
 %code requires {
 	#include <memory>
 	#include <iostream>
+	#include <cmath>
 
-	#include "../instructions/Instructions.h"
+	#include "../instructions/Instruction.h"
+	#include "../instructions/Affectation.h"
+	#include "../instructions/AppelFonction.h"
+	#include "../instructions/Boucle.h"
+	#include "../instructions/Branchement.h"
+	#include "../instructions/Declaration.h"
+
 	#include "../elements/Couleur.h"
-	#include "../elements/formes/Formes.h"
+	#include "../elements/formes/Forme.h"
+	#include "../elements/formes/Carre.h"
+	#include "../elements/formes/Cercle.h"
+	#include "../elements/formes/Chemin.h"
+	#include "../elements/formes/Ellipse.h"
+	#include "../elements/formes/Ligne.h"
+	#include "../elements/formes/Rectangle.h"
+	#include "../elements/formes/Texte.h"
+	#include "../elements/formes/Triangle.h"
 
 	class Scanner;
 	class Driver;
-
-	/*
-	struct ProprieteData {
-		Forme::TypePropriete type;
-		std::string valeur;
-	};
-	*/
 }
 
 %parse-param { Scanner &scanner }

@@ -2,8 +2,15 @@
 #include "Instruction.h"
 #include "../elements/Element.h"
 #include "../Contexte.h"
-#include "../elements/formes/Formes.h"
 #include <string>
+#include "../elements/formes/Carre.h"
+#include "../elements/formes/Cercle.h"
+#include "../elements/formes/Chemin.h"
+#include "../elements/formes/Ellipse.h"
+#include "../elements/formes/Ligne.h"
+#include "../elements/formes/Rectangle.h"
+#include "../elements/formes/Texte.h"
+#include "../elements/formes/Triangle.h"
 
 class Declaration: public Instruction
 {
