@@ -17,7 +17,7 @@ using token = yy::Parser::token;
 
 NUMBER [0-9]+
 HEX "#"[0-9A-Fa-f]{6}
-COMPOSANTE_COULEUR 25[0-5] | 2[0-4][0-9] | 1[0-9][0-9] | [1-9]?[0-9]
+COMPOSANTE_COULEUR 25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]
 
 %option c++
 %option yyclass="Scanner"
@@ -99,19 +99,14 @@ fin return token::END;
 	return token::STRING;
 }
 
-"rgb(" {COMPOSANTE_COULEUR} "," {COMPOSANTE_COULEUR} "," {COMPOSANTE_COULEUR} ")" {
+"rgb("{COMPOSANTE_COULEUR}","{COMPOSANTE_COULEUR}","{COMPOSANTE_COULEUR}")" {
 	yylval->build<std::string>(YYText());
 	return token::COULEUR;
 }
 
 {HEX} {
-	yylval->build<std::string>(YYText);
+	yylval->build<std::string>(YYText());
 	return token::COULEUR;
-}
-
-{NUMBER}? "." {NUMBER} {
-	yylval->build<float>(std::stof(YYText()));
-	return token::REEL;
 }
 
 {NUMBER} {
@@ -119,11 +114,15 @@ fin return token::END;
 	return token::ENTIER;
 }
 
+{NUMBER}?"."{NUMBER} {
+	yylval->build<float>(std::stof(YYText()));
+	return token::REEL;
+}
+
 [A-Za-z_][A-Za-z_0-9]* {
     yylval->build<const char*>(YYText());
     return token::IDENTIFIANT;
 }
-
 
 "\n" {
 	loc->lines();
