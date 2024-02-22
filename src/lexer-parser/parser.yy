@@ -77,8 +77,8 @@
 %token TEXTE
 %token <const char*> STRING
 
-%type <std::unique_ptr<Declaration>> declaration
-%type <std::unique_ptr<Forme>> forme
+%type <std::shared_ptr<Declaration>> declaration
+%type <std::shared_ptr<Forme>> forme
 // Forme::Proprietes Sythetise
 %type <std::unique_ptr<Forme::Proprietes>> proplist_esp
 %type <std::unique_ptr<Forme::Proprietes>> proplist_nl
@@ -109,9 +109,6 @@ programme:
 
 instruction:
 /*
-	 affectation {
-		driver.ast.add($$);
-	}
 	| appelFonction {
 		driver.ast.add($$);
 	}
@@ -120,6 +117,9 @@ instruction:
 	}
 	| branchement {
 		driver.ast.add($$);
+	}
+	| affectation {
+		driver.ast.add(std::move($$));
 	}
 */
 	declaration {
@@ -141,28 +141,28 @@ declaration:
 
 forme:
 	CARRE NUMBER NUMBER NUMBER {
-		$$ = std::make_unique<Carre>($2, $3, $4);
+		$$ = std::make_shared<Carre>($2, $3, $4);
 	}
 	| RECTANGLE NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
-		$$ = std::make_unique<Rectangle>($2, $3, $4, $5, $6, $7, $8, $9);
+		$$ = std::make_shared<Rectangle>($2, $3, $4, $5, $6, $7, $8, $9);
 	}
 	| TRIANGLE NUMBER NUMBER NUMBER NUMBER {
-		$$ = std::make_unique<Triangle>($2, $3, $4, $5);
+		$$ = std::make_shared<Triangle>($2, $3, $4, $5);
 	}
 	| CERCLE NUMBER NUMBER NUMBER {
-		$$ = std::make_unique<Cercle>($2, $3, $4);
+		$$ = std::make_shared<Cercle>($2, $3, $4);
 	}
 	| ELLIPSE NUMBER NUMBER NUMBER NUMBER {
-		$$ = std::make_unique<Ellipse>($2, $3, $4, $5);
+		$$ = std::make_shared<Ellipse>($2, $3, $4, $5);
 	}
 	| LIGNE NUMBER NUMBER NUMBER NUMBER {
-		$$ = std::make_unique<Ligne>($2, $3, $4, $5);
+		$$ = std::make_shared<Ligne>($2, $3, $4, $5);
 	}
 	| CHEMIN chemin_points {
 		$$ = std::move($2);
 	}
 	| TEXTE NUMBER NUMBER STRING STRING {
-		$$ = std::make_unique<Texte>($2, $3, $4, $5);
+		$$ = std::make_shared<Texte>($2, $3, $4, $5);
 	}
 
 chemin_points:
@@ -208,10 +208,9 @@ propriete:
 	}
 
 affectation:
-    /*IDENTIFIANT '=' expression {
+    IDENTIFIANT '=' expression {
 
-        std::cout << "Affectation à réaliser" << std::endl;
-    }*/
+    }
 
 appelFonction:
 /*
