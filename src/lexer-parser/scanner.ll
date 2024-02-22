@@ -19,25 +19,6 @@ NUMBER [0-9]+
 HEX "#"[0-9A-Fa-f]{6}
 COMPOSANTE_COULEUR 25[0-5] | 2[0-4][0-9] | 1[0-9][0-9] | [1-9]?[0-9]
 
-/*
-"rgb(" {COMPOSANTE_COULEUR} "," {COMPOSANTE_COULEUR} "," {COMPOSANTE_COULEUR} ")" {
-	yylval->build<std::string>(YYText());
-	return token::COULEUR;
-}
-
-{HEX} {
-	yylval->build<std::string>(YYText);
-	return token::COULEUR;
-}
-
-{NUMBER}? "." {NUMBER} {
-	yylval->build<float>(std::stof(YYText()));
-	return token::REEL;
-}
-*/
-
-
-
 %option c++
 %option yyclass="Scanner"
 %option noyywrap
@@ -81,11 +62,6 @@ fin return token::END;
 "opacite" return token::KW_OPACITE;
 "epaisseur" return token::KW_EPAISSEUR;
 
-[A-Za-z_][A-Za-z_0-9]* {
-    yylval->build<const char*>(YYText());
-    return token::IDENTIFIANT;
-}
-
 "rouge" {
 	yylval->build<std::string>("red");
 	return token::COULEUR;
@@ -123,10 +99,31 @@ fin return token::END;
 	return token::STRING;
 }
 
+"rgb(" {COMPOSANTE_COULEUR} "," {COMPOSANTE_COULEUR} "," {COMPOSANTE_COULEUR} ")" {
+	yylval->build<std::string>(YYText());
+	return token::COULEUR;
+}
+
+{HEX} {
+	yylval->build<std::string>(YYText);
+	return token::COULEUR;
+}
+
+{NUMBER}? "." {NUMBER} {
+	yylval->build<float>(std::stof(YYText()));
+	return token::REEL;
+}
+
 {NUMBER} {
 	yylval->build<int>(std::atoi(YYText()));
 	return token::ENTIER;
 }
+
+[A-Za-z_][A-Za-z_0-9]* {
+    yylval->build<const char*>(YYText());
+    return token::IDENTIFIANT;
+}
+
 
 "\n" {
 	loc->lines();
