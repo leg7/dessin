@@ -1,7 +1,10 @@
 %{
 #include "scanner.hh"
 #include <cstdlib>
+#include <cstdio>
 #include <string>
+#include <iostream>
+#include <cstdint>
 
 #define YY_NO_UNISTD_H
 
@@ -15,9 +18,11 @@ using token = yy::Parser::token;
 
 %}
 
-NUMBER [0-9]+
+ENTIER [0-9]+
 HEX "#"[0-9A-Fa-f]{6}
 COMPOSANTE_COULEUR 25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]
+REEL {ENTIER}?"."{ENTIER}
+NOMBRE {ENTIER}|{REEL}
 
 %option c++
 %option yyclass="Scanner"
@@ -37,6 +42,13 @@ fin return token::END;
 "("				 return '(';
 ")"				 return ')';
 "="				 return '=';
+","				 return ',';
+":"				 return ':';
+"&"				 return '&';
+";"				 return ';';
+"->"			         return token::FLECHE;
+"{"				 return '{';
+"}"				 return '}';
 
 (?i:carre)		         return token::CARRE;
 (?i:rectangle)	                 return token::RECTANGLE;
@@ -46,15 +58,6 @@ fin return token::END;
 (?i:ligne)		         return token::LIGNE;
 (?i:chemin)		         return token::CHEMIN;
 (?i:texte)		         return token::TEXTE;
-","				 return ',';
-
-":"				 return ':';
-"&"				 return '&';
-";"				 return ';';
-"->"			         return token::FLECHE;
-"{"				 return '{';
-"}"				 return '}';
-
 
 "couleur" return token::KW_COULEUR;
 "rotation" return token::KW_ROTATION;
@@ -63,65 +66,84 @@ fin return token::END;
 "epaisseur" return token::KW_EPAISSEUR;
 
 "rouge" {
-	yylval->build<std::string>("red");
-	return token::COULEUR;
+	yylval->build<Couleur::Nom>(Couleur::Nom::Rouge);
+	return token::COULEUR_NOM;
 }
 "vert" {
-	yylval->build<std::string>("green");
-	return token::COULEUR;
+	yylval->build<Couleur::Nom>(Couleur::Nom::Vert);
+	return token::COULEUR_NOM;
 }
 "bleu" {
-	yylval->build<std::string>("blue");
-	return token::COULEUR;
+	yylval->build<Couleur::Nom>(Couleur::Nom::Bleu);
+	return token::COULEUR_NOM;
 }
 "jaune" {
-	yylval->build<std::string>("yellow");
-	return token::COULEUR;
+	yylval->build<Couleur::Nom>(Couleur::Nom::Jaune);
+	return token::COULEUR_NOM;
 }
-"violet" { yylval->build<std::string>("purple");
-	return token::COULEUR;
+"violet" {
+	yylval->build<Couleur::Nom>(Couleur::Nom::Violet);
+	return token::COULEUR_NOM;
 }
 "blanc" {
-	yylval->build<std::string>("white");
-	return token::COULEUR;
+	yylval->build<Couleur::Nom>(Couleur::Nom::Blanc);
+	return token::COULEUR_NOM;
 }
 "noir" {
-	yylval->build<std::string>("black");
-	return token::COULEUR;
+	yylval->build<Couleur::Nom>(Couleur::Nom::Noir);
+	return token::COULEUR_NOM;
 }
-"orange"|"magenta"|"cyan" {
-	yylval->build<std::string>(YYText());
-	return token::COULEUR;
+"orange" {
+	yylval->build<Couleur::Nom>(Couleur::Nom::Orange);
+	return token::COULEUR_NOM;
+}
+"magenta" {
+	yylval->build<Couleur::Nom>(Couleur::Nom::Magenta);
+	return token::COULEUR_NOM;
+}
+"cyan" {
+	yylval->build<Couleur::Nom>(Couleur::Nom::Cyan);
+	return token::COULEUR_NOM;
 }
 
 "\"[[:alpha:]]\"" {
-	yylval->build<const char*>(YYText());
+	yylval->build<std::string>(YYText());
 	return token::STRING;
 }
 
-"rgb("{COMPOSANTE_COULEUR}","{COMPOSANTE_COULEUR}","{COMPOSANTE_COULEUR}")" {
-	yylval->build<std::string>(YYText());
-	return token::COULEUR;
+"rgb(" {
+	return token::COULEUR_RGB_START;
+}
+
+{COMPOSANTE_COULEUR} {
+	yylval->build<int>(std::stoi(YYText()));
+	return token::COULEUR_RGB_PART;
 }
 
 {HEX} {
-	yylval->build<std::string>(YYText());
-	return token::COULEUR;
+	const char *tmp = YYText();
+	yylval->build<uint32_t>(static_cast<uint32_t>(std::strtoul(++tmp, nullptr, 16)));
+	return token::COULEUR_HEX;
 }
 
-{NUMBER} {
-	yylval->build<int>(std::atoi(YYText()));
+{ENTIER} { yylval->build<int>(std::atoi(YYText()));
 	return token::ENTIER;
+	puts("deez nuts");
 }
 
-{NUMBER}?"."{NUMBER} {
+{REEL} {
 	yylval->build<float>(std::stof(YYText()));
 	return token::REEL;
 }
 
+{NOMBRE} {
+	yylval->build<double>(std::stod(YYText()));
+	return token::NOMBRE;
+}
+
 [A-Za-z_][A-Za-z_0-9]* {
-    yylval->build<const char*>(YYText());
-    return token::IDENTIFIANT;
+	yylval->build<std::string>(std::string(YYText()));
+	return token::IDENTIFIANT;
 }
 
 "\n" {

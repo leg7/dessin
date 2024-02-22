@@ -38,5 +38,7 @@ class Couleur: public Element
         Couleur(const uint8_t r, const uint8_t g, const uint8_t b) noexcept:  _r(r), _g(g), _b(b) {};
         Couleur(Nom n) noexcept;
 	  Couleur(uint32_t hexa) noexcept;
+	  Couleur(const Couleur &c) noexcept = default;
+	  Couleur& operator=(const Couleur &c) noexcept = default;
 	  virtual double toDouble() const noexcept override;
 };

@@ -13,6 +13,7 @@
 	#include <memory>
 	#include <iostream>
 	#include <cmath>
+	#include <cstdint>
 
 	#include "../instructions/Instruction.h"
 	#include "../instructions/Affectation.h"
@@ -52,12 +53,15 @@
 %token END
 %token <int> ENTIER
 %token <float> REEL
+%token <double> NOMBRE
 %token FLECHE
 
-%token <Couleur> COULEUR
+%token <Couleur::Nom> COULEUR_NOM
+%token COULEUR_RGB_START
+%token <int> COULEUR_RGB_PART
+%token <uint32_t> COULEUR_HEX
 
-%token <int> NUMBER
-%token IDENTIFIANT
+%token <std::string> IDENTIFIANT
 
 %token KW_COULEUR
 %token KW_ROTATION
@@ -75,7 +79,7 @@
 %token LIGNE
 %token CHEMIN
 %token TEXTE
-%token <const char*> STRING
+%token <std::string> STRING
 
 %type <std::shared_ptr<Declaration>> declaration
 %type <std::shared_ptr<Forme>> forme
@@ -83,6 +87,7 @@
 %type <std::unique_ptr<Forme::Proprietes>> proplist_esp
 %type <std::unique_ptr<Forme::Proprietes>> proplist_nl
 %type <std::unique_ptr<Forme::Proprietes>> propriete
+%type <std::unique_ptr<Couleur>> couleur
 
 %type <std::unique_ptr<AppelFonction>> appelFonction
 %type <std::vector<std::shared_ptr<Instruction>>> arglist
@@ -138,39 +143,42 @@ declaration:
 		$1->setProprietes(*$3);
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($1));
 	}
+	| KW_COULEUR IDENTIFIANT '=' couleur ';' {
+		$$ = std::make_unique<Declaration>(driver.contexteCourant, $2, std::move($4));
+	}
 
 forme:
-	CARRE NUMBER NUMBER NUMBER {
+	CARRE ENTIER ENTIER ENTIER {
 		$$ = std::make_shared<Carre>($2, $3, $4);
 	}
-	| RECTANGLE NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
+	| RECTANGLE ENTIER ENTIER ENTIER ENTIER ENTIER ENTIER ENTIER ENTIER {
 		$$ = std::make_shared<Rectangle>($2, $3, $4, $5, $6, $7, $8, $9);
 	}
-	| TRIANGLE NUMBER NUMBER NUMBER NUMBER {
+	| TRIANGLE ENTIER ENTIER ENTIER ENTIER {
 		$$ = std::make_shared<Triangle>($2, $3, $4, $5);
 	}
-	| CERCLE NUMBER NUMBER NUMBER {
+	| CERCLE ENTIER ENTIER ENTIER {
 		$$ = std::make_shared<Cercle>($2, $3, $4);
 	}
-	| ELLIPSE NUMBER NUMBER NUMBER NUMBER {
+	| ELLIPSE ENTIER ENTIER ENTIER ENTIER {
 		$$ = std::make_shared<Ellipse>($2, $3, $4, $5);
 	}
-	| LIGNE NUMBER NUMBER NUMBER NUMBER {
+	| LIGNE ENTIER ENTIER ENTIER ENTIER {
 		$$ = std::make_shared<Ligne>($2, $3, $4, $5);
 	}
 	| CHEMIN chemin_points {
 		$$ = std::move($2);
 	}
-	| TEXTE NUMBER NUMBER STRING STRING {
+	| TEXTE ENTIER ENTIER STRING STRING {
 		$$ = std::make_shared<Texte>($2, $3, $4, $5);
 	}
 
 chemin_points:
-	chemin_points ',' NUMBER NUMBER  {
+	chemin_points ',' ENTIER ENTIER  {
 		$$ = std::move($1);
 		$$->ajoutePoint($3, $4);
 	}
-	| NUMBER NUMBER {
+	| ENTIER ENTIER {
 		$$ = std::make_unique<Chemin>($1, $2);
 	}
 
@@ -191,14 +199,14 @@ proplist_nl:
 	}
 
 propriete:
-	KW_COULEUR ':' COULEUR {
-		$$->couleur = $3;
+	KW_COULEUR ':' couleur {
+		$$->couleur = *$3;
 	}
 	| KW_ROTATION ':' REEL {
 		$$->rotation = fmod($3, 360.0f);
 	}
-	| KW_REMPLISSAGE ':' COULEUR {
-		$$->remplissage = $3;
+	| KW_REMPLISSAGE ':' couleur {
+		$$->remplissage = *$3;
 	}
 	| KW_OPACITE ':' REEL '%' {
 		$$->opacite = $3 * .01f;
@@ -206,6 +214,17 @@ propriete:
 	| KW_EPAISSEUR ':' REEL {
 		$$->epaisseur = $3;
 	}
+
+couleur:
+	 COULEUR_NOM {
+		$$ = std::make_unique<Couleur>($1);
+	 }
+	 | COULEUR_RGB_START COULEUR_RGB_PART ',' COULEUR_RGB_PART ',' COULEUR_RGB_PART ')' {
+	 	$$ = std::make_unique<Couleur>($2, $4, $6);
+	 }
+	 | COULEUR_HEX {
+	 	$$ = std::make_unique<Couleur>($1);
+	 }
 
 affectation:
     IDENTIFIANT '=' expression {
@@ -246,7 +265,7 @@ corps:
 comparaison:
 
 operation:
-	NUMBER {
+	NOMBRE {
 		$$ = $1;
 	}
 	| '(' operation ')' {
