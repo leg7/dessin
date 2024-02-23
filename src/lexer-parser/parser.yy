@@ -22,6 +22,7 @@
 	#include "../instructions/Branchement.h"
 	#include "../instructions/Declaration.h"
 
+	#include "../elements/Taille.h"
 	#include "../elements/Couleur.h"
 	#include "../elements/ElementPrimitif.h"
 	#include "../elements/formes/Forme.h"
@@ -63,6 +64,7 @@
 
 %token <std::string> IDENTIFIANT
 
+%token KW_TAILLE
 %token KW_COULEUR
 %token KW_ROTATION
 %token KW_REMPLISSAGE
@@ -166,6 +168,9 @@ declaration:
 			exit(69);
 		}
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, $2, std::make_shared<ElementPrimitif<double>>($4));
+	}
+	| KW_TAILLE NOMBRE NOMBRE ';' {
+		$$ = std::make_unique<Declaration>(driver.contexteCourant, "taille", std::make_shared<Taille>($2, $3));
 	}
 
 forme:

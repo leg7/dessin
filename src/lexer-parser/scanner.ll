@@ -58,6 +58,7 @@ fin return token::END;
 (?i:chemin)		         return token::CHEMIN;
 (?i:texte)		         return token::TEXTE;
 
+"taille" return token::KW_TAILLE;
 "couleur" return token::KW_COULEUR;
 "rotation" return token::KW_ROTATION;
 "remplissage" return token::KW_REMPLISSAGE;

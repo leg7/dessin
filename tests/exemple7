@@ -1,0 +1,4 @@
+carre 0 0 100 -> couleur : rouge;
+carre 100 100 100 -> couleur : rgb(255,0,0);
+carre 200 200 100 -> couleur : #ff0000;
+fin

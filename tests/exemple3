@@ -1,0 +1,20 @@
+taille 1000 1000;
+C1 = carre 0 0 0 -> couleur : rouge & opacite : 30%;
+C1.positionX = 250;
+C1.positionY = 250;
+C1.taille = 100;
+carre[0].couleur = bleu;
+carre[0].epaisseur = 10;
+C1.remplissage = rouge;
+C1.opacité = 50%;
+rectangle 0 0 0 0 0 0 0 0;
+rectangle[0].rotation = 45°;
+rectangle[0].positionX1 = 100;
+rectangle[0].positionY1 = 100;
+rectangle[0].positionX2 = 100;
+rectangle[0].positionY2 = 200;
+rectangle[0].positionX3 = 150;
+rectangle[0].positionY3 = 200;
+rectangle[0].positionX4 = 150;
+rectangle[0].positionY4 = 100;
+fin

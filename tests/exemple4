@@ -1,0 +1,23 @@
+C1 = carre 250 250 100;
+si (C1.positionX > 250) alors {
+  C1.couleur = rouge;
+}
+sinon {
+  C1.couleur = vert;
+}
+si (C1.positionY <= 250) alors {
+  C1.remplissage = bleu;
+}
+si ((C1.hauteur == 50) && (C1.largeur != 50)) alors {
+  C1.opacite = 0%;
+}
+sinon {
+  C1.opacite = 50%;
+}
+si (C1.couleur est rouge) alors {
+  C1.taille = 50;
+}
+si (C1.couleur n'est pas rouge) alors {
+  C1.taille = 200;
+}
+fin

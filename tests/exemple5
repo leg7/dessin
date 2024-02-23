@@ -1,0 +1,13 @@
+entier i = 0;
+tant que (i < 5) {
+  carre i*100 i*100 50;
+  i = i + 1;
+}
+
+entier j = 0;
+
+repete 5 fois {
+  cercle j*100+25 j*100+25 25;
+  j = j + 1;
+}
+fin

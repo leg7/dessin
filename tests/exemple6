@@ -1,0 +1,8 @@
+fonction maison (x y taille) {
+  carre x-taille y-taille taille;
+  triangle x y-taille taille taille;
+}
+fonction dessiner() {
+  maison 100 500 200;
+}
+fin
