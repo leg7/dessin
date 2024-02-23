@@ -13,6 +13,7 @@ class Boucle: public Instruction
 		const std::shared_ptr<Expression> &cond,
 		const std::vector<std::shared_ptr<Instruction>> &then) noexcept:
 			Instruction(c), _condition(cond), _then(then) {}
+	// TODO: constructeur sans cond mais entier pour boucle for
 
 	virtual void executer() const noexcept override;
 };

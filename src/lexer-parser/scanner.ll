@@ -5,6 +5,8 @@
 #include <string>
 #include <iostream>
 #include <cstdint>
+#include "../expressions/ExpressionBinaire.h"
+#include "../expressions/ExpressionUnaire.h"
 
 #define YY_NO_UNISTD_H
 
@@ -33,13 +35,8 @@ HEX "#"[0-9A-Fa-f]{6}
 fin return token::END;
 
 
-"+"				 return '+';
-"*"				 return '*';
-"-"				 return '-';
-"/"				 return '/';
 "("				 return '(';
 ")"				 return ')';
-"="				 return '=';
 ","				 return ',';
 ":"				 return ':';
 "&"				 return '&';
@@ -50,7 +47,7 @@ fin return token::END;
 "%"				 return '%';
 "°"				 return token::DEGREE;
 
-(?i:carre)|(?i:carré)		         return token::CARRE;
+(?i:carre)|(?i:carré)		 return token::CARRE;
 (?i:rectangle)	                 return token::RECTANGLE;
 (?i:triangle)	                 return token::TRIANGLE;
 (?i:cercle)		         return token::CERCLE;
@@ -69,6 +66,59 @@ fin return token::END;
 (?i:entier) return token::KW_ENTIER;
 (?i:reel)|(?i:réel) return token::KW_REEL;
 
+
+
+"+" {
+	yylval->build<ExpressionBinaire::Operation>(ExpressionBinaire::Operation::ADD);
+	return token::OP_ADD;
+}
+"-" {
+	'-';
+}
+"*" {
+	yylval->build<ExpressionBinaire::Operation>(ExpressionBinaire::Operation::MUL);
+	return token::OP_MUL;
+}
+"/" {
+	yylval->build<ExpressionBinaire::Operation>(ExpressionBinaire::Operation::DIV);
+	return token::OP_DIV;
+}
+"=" {
+	yylval->build<ExpressionBinaire::Operation>(ExpressionBinaire::Operation::EQ);
+	return token::OP_EQ;
+}
+">" {
+	yylval->build<ExpressionBinaire::Operation>(ExpressionBinaire::Operation::GT);
+	return token::OP_GT;
+}
+">=" {
+	yylval->build<ExpressionBinaire::Operation>(ExpressionBinaire::Operation::GE);
+	return token::OP_GE;
+}
+"<" {
+	yylval->build<ExpressionBinaire::Operation>(ExpressionBinaire::Operation::LT);
+	return token::OP_LT;
+}
+"<=" {
+	yylval->build<ExpressionBinaire::Operation>(ExpressionBinaire::Operation::LE);
+	return token::OP_LE;
+}
+"&&" {
+	yylval->build<ExpressionBinaire::Operation>(ExpressionBinaire::Operation::AND);
+	return token::OP_AND;
+}
+"||" {
+	yylval->build<ExpressionBinaire::Operation>(ExpressionBinaire::Operation::OR);
+	return token::OP_OR;
+}
+"!" {
+	yylval->build<ExpressionUnaire::Operation>(ExpressionUnaire::Operation::NEG);
+	return token::OP_NEG;
+}
+
+
+
+
 "true" {
 	yylval->build<double>(1);
 	return token::NOMBRE;
@@ -77,6 +127,9 @@ fin return token::END;
 	yylval->build<double>(0);
 	return token::NOMBRE;
 }
+
+
+
 
 "rouge" {
 	yylval->build<Couleur::Nom>(Couleur::Nom::Rouge);
@@ -114,21 +167,22 @@ fin return token::END;
 	yylval->build<Couleur::Nom>(Couleur::Nom::Magenta);
 	return token::COULEUR_NOM;
 }
-
 "cyan" {
 	yylval->build<Couleur::Nom>(Couleur::Nom::Cyan);
 	return token::COULEUR_NOM;
 }
-
 "rgb(" {
 	return token::COULEUR_RGB_START;
 }
-
 {HEX} {
 	const char *tmp = YYText();
 	yylval->build<uint32_t>(static_cast<uint32_t>(std::strtoul(++tmp, nullptr, 16)));
 	return token::COULEUR_HEX;
 }
+
+
+
+
 
 {NOMBRE} {
 	yylval->build<double>(std::stod(YYText()));

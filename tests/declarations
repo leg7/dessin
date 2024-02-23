@@ -9,8 +9,8 @@ texte 1 1 "texte" "police d'écriture";
 
 carre 0 0 50 -> couleur : rouge & opacite : 30%;
 carre 0 0 50 {
-  couleur : rouge
-  opacite : 30%
+  couleur : rouge;
+  opacite : 30%;
 }
 
 booleen b = true;

@@ -4,6 +4,7 @@
 
 class ExpressionBinaire: public Expression
 {
+	public:
 	enum class Operation
 	{
 		ADD,
@@ -15,7 +16,11 @@ class ExpressionBinaire: public Expression
 		GE,
 		LT,
 		LE,
+		AND,
+		OR,
 	};
+
+	private:
 	std::shared_ptr<Expression> _gauche, _droite;
 	Operation _op;
 

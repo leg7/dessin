@@ -15,6 +15,11 @@
 	#include <cmath>
 	#include <cstdint>
 
+	#include "../expressions/ExpressionBinaire.h"
+	#include "../expressions/ExpressionUnaire.h"
+	#include "../expressions/Variable.h"
+	#include "../expressions/Constante.h"
+
 	#include "../instructions/Instruction.h"
 	#include "../instructions/Affectation.h"
 	#include "../instructions/AppelFonction.h"
@@ -76,6 +81,22 @@
 %token KW_ENTIER
 %token KW_REEL
 
+%token <ExpressionBinaire::Operation> OP_ADD
+%token <ExpressionBinaire::Operation> OP_MUL
+%token <ExpressionBinaire::Operation> OP_DIV
+%token <ExpressionBinaire::Operation> OP_EQ
+%token <ExpressionBinaire::Operation> OP_GT
+%token <ExpressionBinaire::Operation> OP_GE
+%token <ExpressionBinaire::Operation> OP_LT
+%token <ExpressionBinaire::Operation> OP_LE
+%token <ExpressionBinaire::Operation> OP_AND
+%token <ExpressionBinaire::Operation> OP_OR
+%token <ExpressionUnaire::Operation> OP_NEG
+
+%left OP_EQ OP_GT OP_GE OP_LT OP_LE OP_AND OP_OR
+%left '-' OP_ADD OP_MUL OP_DIV
+%precedence NEG
+
 %token CARRE
 %token RECTANGLE
 %token TRIANGLE
@@ -92,20 +113,19 @@
 %type <Forme::Proprietes> proplist_nl
 %type <std::unique_ptr<Couleur>> couleur
 
+%type <std::unique_ptr<Expression>> expression
+
 %type <std::unique_ptr<AppelFonction>> appelFonction
 %type <std::vector<std::shared_ptr<Instruction>>> arglist
 
 %type <std::unique_ptr<Boucle>> boucle
-%type <std::unique_ptr<Expression>> expression
 %type <std::unique_ptr<Expression>> comparaison
 %type <std::unique_ptr<Instruction>> instruction
 %type <std::unique_ptr<Branchement>> branchement
 %type <std::vector<std::shared_ptr<Instruction>>> corps
 %type <int> operation
 %type <std::unique_ptr<Chemin>> chemin_points
-%left '-' '+'
-%left '*' '/'
-%precedence  NEG
+
 
 %%
 
@@ -114,13 +134,6 @@ programme:
 	| END NL {
 		YYACCEPT;
 	}
-
-espacement:
-	NL espacement
-	| /* epsilon */
-
-separateur:
-	';' espacement | NL espacement
 
 instruction:
 /*
@@ -154,31 +167,31 @@ declaration:
 		$1->setProprietes($4);
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($1));
 	}
-	| IDENTIFIANT '=' forme ';' {
+	| IDENTIFIANT OP_EQ forme ';' {
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($3), $1);
 	}
-	| IDENTIFIANT '=' forme FLECHE proplist_esp ';' {
+	| IDENTIFIANT OP_EQ forme FLECHE proplist_esp ';' {
 		$3->setProprietes($5);
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($3), $1);
 	}
-	| IDENTIFIANT '=' forme '{' NL proplist_nl '}' {
+	| IDENTIFIANT OP_EQ forme '{' NL proplist_nl '}' {
 		$3->setProprietes($6);
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($3), $1);
 	}
-	| KW_COULEUR IDENTIFIANT '=' couleur ';' {
+	| KW_COULEUR IDENTIFIANT OP_EQ couleur ';' {
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($4), $2);
 	}
-	| KW_BOOLEAN IDENTIFIANT '=' NOMBRE ';' {
-		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::make_shared<ElementPrimitif<bool>>($4), $2);
+	| KW_BOOLEAN IDENTIFIANT OP_EQ expression ';' {
+		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::make_shared<ElementPrimitif<bool>>($4->eval()->toDouble()), $2);
 	}
-	| KW_ENTIER IDENTIFIANT '=' NOMBRE ';' {
+	| KW_ENTIER IDENTIFIANT OP_EQ NOMBRE ';' {
 		if (!estEntier($4)) {
 			std::cout << $4 << "n'est pas entier!\n";
 			exit(69);
 		}
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::make_shared<ElementPrimitif<int>>($4), $2);
 	}
-	| KW_REEL IDENTIFIANT '=' NOMBRE ';' {
+	| KW_REEL IDENTIFIANT OP_EQ NOMBRE ';' {
 		if (estEntier($4)) {
 			std::cout << $4 << "n'est pas flotant!\n";
 			exit(69);
@@ -189,39 +202,88 @@ declaration:
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::make_shared<Taille>($2, $3), "taille");
 	}
 
+expression:
+	expression OP_ADD expression {
+		 $$ = std::make_unique<ExpressionBinaire>(std::move($1), std::move($3), $2);
+	}
+	| expression OP_MUL expression {
+		 $$ = std::make_unique<ExpressionBinaire>(std::move($1), std::move($3), $2);
+	}
+	| expression OP_DIV expression {
+		 $$ = std::make_unique<ExpressionBinaire>(std::move($1), std::move($3), $2);
+	}
+	| expression OP_EQ expression {
+		 $$ = std::make_unique<ExpressionBinaire>(std::move($1), std::move($3), $2);
+	}
+	| expression OP_GT expression {
+		 $$ = std::make_unique<ExpressionBinaire>(std::move($1), std::move($3), $2);
+	}
+	| expression OP_GE expression {
+		 $$ = std::make_unique<ExpressionBinaire>(std::move($1), std::move($3), $2);
+	}
+	| expression OP_LT expression {
+		 $$ = std::make_unique<ExpressionBinaire>(std::move($1), std::move($3), $2);
+	}
+	| expression OP_LE expression {
+		 $$ = std::make_unique<ExpressionBinaire>(std::move($1), std::move($3), $2);
+	}
+	| expression OP_AND expression {
+		 $$ = std::make_unique<ExpressionBinaire>(std::move($1), std::move($3), $2);
+	}
+	| expression OP_OR expression {
+		 $$ = std::make_unique<ExpressionBinaire>(std::move($1), std::move($3), $2);
+	}
+	| expression '-' expression {
+		 $$ = std::make_unique<ExpressionBinaire>(std::move($1), std::move($3), ExpressionBinaire::Operation::SUB);
+	}
+	/* TODO: Configurer la precedence corretement
+	| '-' expression %prec NEG {
+		 $$ = std::make_unique<ExpressionUnaire>(std::move($2), ExpressionUnaire::Operation::MIN);
+	}
+	*/
+	| IDENTIFIANT {
+		 $$ = std::make_unique<Variable>(driver.contexteCourant->at($1));
+	}
+	| NOMBRE {
+		 $$ = std::make_unique<Constante>(std::make_shared<ElementPrimitif<double>>($1));
+	}
+
 forme:
-	CARRE NOMBRE NOMBRE NOMBRE {
-		$$ = std::make_shared<Carre>($2, $3, $4);
+	CARRE expression expression expression {
+		$$ = std::make_shared<Carre>($2->eval()->toDouble(), $3->eval()->toDouble(), $4->eval()->toDouble());
 	}
-	| RECTANGLE NOMBRE NOMBRE NOMBRE NOMBRE NOMBRE NOMBRE NOMBRE NOMBRE {
-		$$ = std::make_shared<Rectangle>($2, $3, $4, $5, $6, $7, $8, $9);
+	| RECTANGLE expression expression expression expression expression expression expression expression {
+		$$ = std::make_shared<Rectangle>($2->eval()->toDouble(), $3->eval()->toDouble(), $4->eval()->toDouble(),
+						 $5->eval()->toDouble(), $6->eval()->toDouble(), $7->eval()->toDouble(),
+						 $8->eval()->toDouble(), $9->eval()->toDouble());
 	}
-	| TRIANGLE NOMBRE NOMBRE NOMBRE NOMBRE {
-		$$ = std::make_shared<Triangle>($2, $3, $4, $5);
+	| TRIANGLE expression expression expression expression {
+		$$ = std::make_shared<Triangle>($2->eval()->toDouble(), $3->eval()->toDouble(), $4->eval()->toDouble(), $5->eval()->toDouble());
 	}
-	| CERCLE NOMBRE NOMBRE NOMBRE {
-		$$ = std::make_shared<Cercle>($2, $3, $4);
+	| CERCLE expression expression expression {
+		$$ = std::make_shared<Cercle>($2->eval()->toDouble(), $3->eval()->toDouble(), $4->eval()->toDouble());
 	}
-	| ELLIPSE NOMBRE NOMBRE NOMBRE NOMBRE {
-		$$ = std::make_shared<Ellipse>($2, $3, $4, $5);
+	| ELLIPSE expression expression expression expression {
+		$$ = std::make_shared<Ellipse>($2->eval()->toDouble(), $3->eval()->toDouble(), $4->eval()->toDouble(), $5->eval()->toDouble());
 	}
-	| LIGNE NOMBRE NOMBRE NOMBRE NOMBRE {
-		$$ = std::make_shared<Ligne>($2, $3, $4, $5);
+	| LIGNE expression expression expression expression {
+		$$ = std::make_shared<Ligne>($2->eval()->toDouble(), $3->eval()->toDouble(), $4->eval()->toDouble(), $5->eval()->toDouble());
 	}
 	| CHEMIN chemin_points {
 		$$ = std::move($2);
 	}
-	| TEXTE NOMBRE NOMBRE STRING STRING {
-		$$ = std::make_shared<Texte>($2, $3, $4, $5);
+	| TEXTE expression expression STRING STRING {
+		// TODO: Utiliser des expressions pour texte + nom de police
+		$$ = std::make_shared<Texte>($2->eval()->toDouble(), $3->eval()->toDouble(), $4, $5);
 	}
 
 chemin_points:
-	chemin_points ',' NOMBRE NOMBRE  {
+	chemin_points ',' expression expression  {
 		$$ = std::move($1);
-		$$->ajoutePoint($3, $4);
+		$$->ajoutePoint($3->eval()->toDouble(), $4->eval()->toDouble());
 	}
-	| NOMBRE NOMBRE {
-		$$ = std::make_unique<Chemin>($1, $2);
+	| expression expression {
+		$$ = std::make_unique<Chemin>($1->eval()->toDouble(), $2->eval()->toDouble());
 	}
 
 proplist_esp:
@@ -231,14 +293,14 @@ proplist_esp:
 	| KW_REMPLISSAGE ':' couleur {
 		$$.remplissage = *$3;
 	}
-	| KW_OPACITE ':' NOMBRE '%' {
-		$$.opacite = $3 * .01f;
+	| KW_OPACITE ':' expression '%' {
+		$$.opacite = $3->eval()->toDouble() * .01f;
 	}
-	| KW_ROTATION ':' NOMBRE DEGREE {
-		$$.rotation = fmod($3, 360.0f);
+	| KW_ROTATION ':' expression DEGREE {
+		$$.rotation = fmod($3->eval()->toDouble(), 360.0f);
 	}
-	| KW_EPAISSEUR ':' NOMBRE {
-		$$.epaisseur = $3;
+	| KW_EPAISSEUR ':' expression {
+		$$.epaisseur = $3->eval()->toDouble();
 	}
 	| KW_COULEUR ':' couleur '&' proplist_esp {
 		$$.couleur = *$3;
@@ -246,14 +308,14 @@ proplist_esp:
 	| KW_REMPLISSAGE ':' couleur '&' proplist_esp {
 		$$.remplissage = *$3;
 	}
-	| KW_OPACITE ':' NOMBRE '%' '&' proplist_esp {
-		$$.opacite = $3 * .01f;
+	| KW_OPACITE ':' expression '%' '&' proplist_esp {
+		$$.opacite = $3->eval()->toDouble() * .01f;
 	}
-	| KW_ROTATION ':' NOMBRE DEGREE '&' proplist_esp{
-		$$.rotation = fmod($3, 360.0f);
+	| KW_ROTATION ':' expression DEGREE '&' proplist_esp{
+		$$.rotation = fmod($3->eval()->toDouble(), 360.0f);
 	}
-	| KW_EPAISSEUR ':' NOMBRE '&' proplist_esp {
-		$$.epaisseur = $3;
+	| KW_EPAISSEUR ':' expression '&' proplist_esp {
+		$$.epaisseur = $3->eval()->toDouble();
 	}
 
 proplist_nl:
@@ -263,14 +325,14 @@ proplist_nl:
 	| KW_REMPLISSAGE ':' couleur ';' NL {
 		$$.remplissage = *$3;
 	}
-	| KW_OPACITE ':' NOMBRE '%' ';' NL {
-		$$.opacite = $3 * .01f;
+	| KW_OPACITE ':' expression '%' ';' NL {
+		$$.opacite = $3->eval()->toDouble() * .01f;
 	}
-	| KW_ROTATION ':' NOMBRE DEGREE ';' NL {
-		$$.rotation = fmod($3, 360.0f);
+	| KW_ROTATION ':' expression DEGREE ';' NL {
+		$$.rotation = fmod($3->eval()->toDouble(), 360.0f);
 	}
-	| KW_EPAISSEUR ':' NOMBRE ';' NL {
-		$$.epaisseur = $3;
+	| KW_EPAISSEUR ':' expression ';' NL {
+		$$.epaisseur = $3->eval()->toDouble();
 	}
 	| KW_COULEUR ':' couleur ';' NL proplist_nl {
 		$$.couleur = *$3;
@@ -278,33 +340,34 @@ proplist_nl:
 	| KW_REMPLISSAGE ':' couleur ';' NL proplist_nl {
 		$$.remplissage = *$3;
 	}
-	| KW_OPACITE ':' NOMBRE '%' ';' NL proplist_nl {
-		$$.opacite = $3 * .01f;
+	| KW_OPACITE ':' expression '%' ';' NL proplist_nl {
+		$$.opacite = $3->eval()->toDouble() * .01f;
 	}
-	| KW_ROTATION ':' NOMBRE DEGREE ';' NL proplist_nl {
-		$$.rotation = fmod($3, 360.0f);
+	| KW_ROTATION ':' expression DEGREE ';' NL proplist_nl {
+		$$.rotation = fmod($3->eval()->toDouble(), 360.0f);
 	}
-	| KW_EPAISSEUR ':' NOMBRE ';' NL proplist_nl {
-		$$.epaisseur = $3;
+	| KW_EPAISSEUR ':' expression ';' NL proplist_nl {
+		$$.epaisseur = $3->eval()->toDouble();
 	}
 
 couleur:
 	 COULEUR_NOM {
 		$$ = std::make_unique<Couleur>($1);
 	 }
-	 | COULEUR_RGB_START NOMBRE ',' NOMBRE ',' NOMBRE ')' {
-	 	$$ = std::make_unique<Couleur>($2, $4, $6);
+	 | COULEUR_RGB_START expression ',' expression ',' expression ')' {
+	 	$$ = std::make_unique<Couleur>($2->eval()->toDouble(), $4->eval()->toDouble(), $6->eval()->toDouble());
 	 }
 	 | COULEUR_HEX {
 	 	$$ = std::make_unique<Couleur>($1);
 	 }
 
 affectation:
-    IDENTIFIANT '=' expression {
+    IDENTIFIANT OP_EQ expression {
 
     }
 
-expression:
+
+
 
 appelFonction:
 /*
@@ -339,29 +402,6 @@ branchement:
 
 corps:
 comparaison:
-
-operation:
-	NOMBRE {
-		$$ = $1;
-	}
-	| '(' operation ')' {
-		$$ = $2;
-	}
-	| operation '+' operation {
-		$$ = $1 + $3;
-	}
-	| operation '-' operation {
-		$$ = $1 - $3;
-	}
-	| operation '*' operation {
-		$$ = $1 * $3;
-	}
-	| operation '/' operation {
-		$$ = $1 / $3;
-	}
-	| '-' operation %prec NEG {
-		$$ = - $2;
-	}
 
 %%
 

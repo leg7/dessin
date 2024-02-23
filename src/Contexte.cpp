@@ -12,6 +12,12 @@ bool Contexte::rm(const std::string &nom) noexcept
 	return _data.erase(nom);
 }
 
+
+std::shared_ptr<Element> Contexte::at(const std::string key) const noexcept
+{
+	return _data.at(key);
+}
+
 std::shared_ptr<Carre> Contexte::getCarre(const int i) const noexcept
 {
 	return std::dynamic_pointer_cast<Carre>(_data.at("carre[" + std::to_string(i) + "]"));

@@ -28,7 +28,7 @@ $(BUILD_DIR)/%.o: $(SRCDIR)/%.cpp $(HEADERS)
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 $(BISON_OUTPUT): $(SRCDIR)/lexer-parser/parser.yy
-	bison -d -o $(SRCDIR)/lexer-parser/parser.cpp $<
+	bison -Wcounterexamples -d -o $(SRCDIR)/lexer-parser/parser.cpp $<
 
 $(FLEX_OUTPUT): $(SRCDIR)/lexer-parser/scanner.ll
 	flex --c++ -o $(SRCDIR)/lexer-parser/scanner.cpp $<
