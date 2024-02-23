@@ -57,6 +57,10 @@
 %token KW_EPAISSEUR
 %token KW_TANTQUE
 %token KW_SI
+%token KW_ALORS
+%token KW_SINON
+%token KW_REPETE
+%token KW_FOIS
 
 %token CARRE
 %token RECTANGLE
@@ -79,6 +83,7 @@
 %type <std::unique_ptr<Instruction>> instruction
 %type <std::unique_ptr<Declaration>> declaration
 %type <std::unique_ptr<Branchement>> branchement
+%type <std::unique_ptr<Affectation>> affectation
 %type <std::vector<std::shared_ptr<Instruction>>> corps
 %type <std::unique_ptr<Forme>> forme
 %type <int> operation
@@ -97,22 +102,20 @@ programme:
 	}
 
 instruction:
-/*
 	 affectation {
-		driver.ast.add($$);
+		driver.ast.add(std::move($1));
 	}
 	| appelFonction {
-		driver.ast.add($$);
+		driver.ast.add(std::move($1));
 	}
 	| boucle {
-		driver.ast.add($$);
+		driver.ast.add(std::move($1));
 	}
 	| branchement {
-		driver.ast.add($$);
+		driver.ast.add(std::move($1));
 	}
-*/
-	declaration {
-		driver.ast.add(std::move($$));
+	| declaration {
+		driver.ast.add(std::move($1));
 	}
 
 
@@ -225,19 +228,26 @@ arglist:
 	expression {
 		$$ = std::vector<std::shared_ptr<Expression>>(1, std::move($1));
 	}
-	| arglist ',' expression {
+	| arglist expression {
 		$$ = std::move($1);
-		$$.push_back(std::move($3));
+		$$.push_back(std::move($2));
 	}
 
 boucle:
 	KW_TANTQUE '(' comparaison ')' corps {
 		$$ = std::make_unique<Boucle>(driver.contexteCourant, std::move($3), $5);
 	}
+	/*
+	| KW_REPETE ENTIER KW_FOIS corps {
+		$$ = std::make_unique<Boucle>(driver.contexteCourant, $2, $4);
+	}*/
 
 branchement:
-	KW_SI '(' comparaison ')' corps {
-		$$ = std::make_unique<Branchement>(driver.contexteCourant, std::move($3), $5);
+	KW_SI '(' comparaison ')' KW_ALORS corps {
+		$$ = std::make_unique<Branchement>(driver.contexteCourant, std::move($3), $6, std::vector<std::shared_ptr<Instruction>>());
+	}
+	| KW_SI '(' comparaison ')' KW_ALORS corps KW_SINON corps {
+		$$ = std::make_unique<Branchement>(driver.contexteCourant, std::move($3), $6, $8);
 	}
 
 expression:

@@ -120,7 +120,7 @@ orange|magenta|cyan {
 
 {NUMBER} {
 	yylval->build<int>(std::atoi(YYText()));
-	return token::ENTIER;
+	return token::NUMBER;
 }
 
 [A-Za-z_][A-Za-z_0-9]* {
