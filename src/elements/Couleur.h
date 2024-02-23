@@ -41,4 +41,5 @@ class Couleur: public Element
 	  Couleur(const Couleur &c) noexcept = default;
 	  Couleur& operator=(const Couleur &c) noexcept = default;
 	  virtual double toDouble() const noexcept override;
+	  std::string to_string() const { return "rgb(" + std::to_string(_r) + "," + std::to_string(_g) + "," + std::to_string(_b) +  ")"; }
 };

@@ -14,6 +14,7 @@
 	#include <iostream>
 	#include <cmath>
 	#include <cstdint>
+	#include <string>
 
 	#include "../instructions/Instruction.h"
 	#include "../instructions/Affectation.h"
@@ -51,6 +52,7 @@
 
 	bool estEntier(double x) { return ceil(x) == x; }
 
+	struct AttribPropriete { Forme::TypePropriete type; std::string valeur; };
 }
 
 %token NL
@@ -88,9 +90,11 @@
 %token <std::string> STRING
 
 %type <std::shared_ptr<Declaration>> declaration
-%type <std::shared_ptr<Forme>> forme
-%type <Forme::Proprietes> proplist_esp
-%type <Forme::Proprietes> proplist_nl
+%type <std::unique_ptr<Forme>> creation_forme
+%type <std::unique_ptr<Forme>> forme
+%type <std::unique_ptr<Forme>> proplist_esp
+%type <std::unique_ptr<Forme>> proplist_nl
+%type <AttribPropriete> propriete
 %type <std::unique_ptr<Couleur>> couleur
 
 %type <std::unique_ptr<AppelFonction>> appelFonction
@@ -110,8 +114,15 @@
 
 %%
 
+espacement:
+	NL espacement
+	| /* epsilon */
+
+separateur:
+	';' | NL espacement
+
 programme:
-	instruction NL programme
+	instruction separateur programme
 	| END NL {
 		YYACCEPT;
 	}
@@ -132,31 +143,15 @@ instruction:
 	}
 */
 	declaration {
-		driver.ast.add(std::move($$));
+		driver.ast.add(std::move($1));
 	}
 	| /* epsilon */
 
 declaration:
-	forme ';' {
+	creation_forme {
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($1));
 	}
-	| forme FLECHE proplist_esp ';' {
-		$1->setProprietes($3);
-		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($1));
-	}
-	| forme '{' NL proplist_nl '}' {
-		$1->setProprietes($4);
-		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($1));
-	}
-	| IDENTIFIANT '=' forme ';' {
-		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($3), $1);
-	}
-	| IDENTIFIANT '=' forme FLECHE proplist_esp ';' {
-		$3->setProprietes($5);
-		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($3), $1);
-	}
-	| IDENTIFIANT '=' forme '{' NL proplist_nl '}' {
-		$3->setProprietes($6);
+	| IDENTIFIANT '=' creation_forme {
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($3), $1);
 	}
 	| KW_COULEUR IDENTIFIANT '=' couleur ';' {
@@ -183,30 +178,41 @@ declaration:
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::make_shared<Taille>($2, $3), "taille");
 	}
 
+creation_forme:
+	forme {
+		$$ = std::move($1);
+	}
+	| proplist_esp ';' {
+		$$ = std::move($1);
+	}
+	| proplist_nl '}' {
+		$$ = std::move($1);
+	}
+
 forme:
 	CARRE NOMBRE NOMBRE NOMBRE {
-		$$ = std::make_shared<Carre>($2, $3, $4);
+		$$ = std::make_unique<Carre>($2, $3, $4);
 	}
 	| RECTANGLE NOMBRE NOMBRE NOMBRE NOMBRE NOMBRE NOMBRE NOMBRE NOMBRE {
-		$$ = std::make_shared<Rectangle>($2, $3, $4, $5, $6, $7, $8, $9);
+		$$ = std::make_unique<Rectangle>($2, $3, $4, $5, $6, $7, $8, $9);
 	}
 	| TRIANGLE NOMBRE NOMBRE NOMBRE NOMBRE {
-		$$ = std::make_shared<Triangle>($2, $3, $4, $5);
+		$$ = std::make_unique<Triangle>($2, $3, $4, $5);
 	}
 	| CERCLE NOMBRE NOMBRE NOMBRE {
-		$$ = std::make_shared<Cercle>($2, $3, $4);
+		$$ = std::make_unique<Cercle>($2, $3, $4);
 	}
 	| ELLIPSE NOMBRE NOMBRE NOMBRE NOMBRE {
-		$$ = std::make_shared<Ellipse>($2, $3, $4, $5);
+		$$ = std::make_unique<Ellipse>($2, $3, $4, $5);
 	}
 	| LIGNE NOMBRE NOMBRE NOMBRE NOMBRE {
-		$$ = std::make_shared<Ligne>($2, $3, $4, $5);
+		$$ = std::make_unique<Ligne>($2, $3, $4, $5);
 	}
 	| CHEMIN chemin_points {
 		$$ = std::move($2);
 	}
 	| TEXTE NOMBRE NOMBRE STRING STRING {
-		$$ = std::make_shared<Texte>($2, $3, $4, $5);
+		$$ = std::make_unique<Texte>($2, $3, $4, $5);
 	}
 
 chemin_points:
@@ -219,67 +225,43 @@ chemin_points:
 	}
 
 proplist_esp:
-	KW_COULEUR ':' couleur {
-		$$.couleur = *$3;
+	forme FLECHE propriete {
+		$$ = std::move($1);
+		$$->setPropriete($3.type, $3.valeur);
 	}
-	| KW_REMPLISSAGE ':' couleur {
-		$$.remplissage = *$3;
-	}
-	| KW_OPACITE ':' NOMBRE '%' {
-		$$.opacite = $3 * .01f;
-	}
-	| KW_ROTATION ':' NOMBRE DEGREE {
-		$$.rotation = fmod($3, 360.0f);
-	}
-	| KW_EPAISSEUR ':' NOMBRE {
-		$$.epaisseur = $3;
-	}
-	| KW_COULEUR ':' couleur '&' proplist_esp {
-		$$.couleur = *$3;
-	}
-	| KW_REMPLISSAGE ':' couleur '&' proplist_esp {
-		$$.remplissage = *$3;
-	}
-	| KW_OPACITE ':' NOMBRE '%' '&' proplist_esp {
-		$$.opacite = $3 * .01f;
-	}
-	| KW_ROTATION ':' NOMBRE DEGREE '&' proplist_esp{
-		$$.rotation = fmod($3, 360.0f);
-	}
-	| KW_EPAISSEUR ':' NOMBRE '&' proplist_esp {
-		$$.epaisseur = $3;
+	| proplist_esp '&' propriete {
+		$$ = std::move($1);
+		$$->setPropriete($3.type, $3.valeur);
 	}
 
 proplist_nl:
-	KW_COULEUR ':' couleur ';' NL {
-		$$.couleur = *$3;
+	forme '{' espacement propriete {
+		$$ = std::move($1);
+		$$->setPropriete($4.type, $4.valeur);
 	}
-	| KW_REMPLISSAGE ':' couleur ';' NL {
-		$$.remplissage = *$3;
+	| proplist_nl separateur propriete {
+		$$ = std::move($1);
+		$$->setPropriete($3.type, $3.valeur);
 	}
-	| KW_OPACITE ':' NOMBRE '%' ';' NL {
-		$$.opacite = $3 * .01f;
+
+propriete:
+	KW_COULEUR ':' couleur {
+		$$.type = Forme::TypePropriete::Couleur;
+		$$.valeur = $3->to_string();
 	}
-	| KW_ROTATION ':' NOMBRE DEGREE ';' NL {
-		$$.rotation = fmod($3, 360.0f);
+	| KW_REMPLISSAGE ':' couleur {
+		$$.type = Forme::TypePropriete::Remplissage;
+		$$.valeur = $3->to_string();
 	}
-	| KW_EPAISSEUR ':' NOMBRE ';' NL {
-		$$.epaisseur = $3;
+	| KW_OPACITE ':' NOMBRE '%' {
+		$$.type = Forme::TypePropriete::Opacite;
+		$$.valeur = std::to_string($3 * .01f);
 	}
-	| KW_COULEUR ':' couleur ';' NL proplist_nl {
-		$$.couleur = *$3;
+	| KW_ROTATION ':' NOMBRE DEGREE {
+		$$.valeur = std::to_string(fmod($3, 360.0f));
 	}
-	| KW_REMPLISSAGE ':' couleur ';' NL proplist_nl {
-		$$.remplissage = *$3;
-	}
-	| KW_OPACITE ':' NOMBRE '%' ';' NL proplist_nl {
-		$$.opacite = $3 * .01f;
-	}
-	| KW_ROTATION ':' NOMBRE DEGREE ';' NL proplist_nl {
-		$$.rotation = fmod($3, 360.0f);
-	}
-	| KW_EPAISSEUR ':' NOMBRE ';' NL proplist_nl {
-		$$.epaisseur = $3;
+	| KW_EPAISSEUR ':' NOMBRE {
+		$$.valeur = std::to_string($3);
 	}
 
 couleur:
