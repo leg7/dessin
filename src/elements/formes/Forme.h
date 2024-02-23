@@ -38,6 +38,9 @@ public:
     void setProprietes(const Proprietes &p) noexcept;
     Type type() const noexcept;
 
+protected:
+	std::string proprietes_svg() const;
+
 private:
     Proprietes _prop;
     Type _type;

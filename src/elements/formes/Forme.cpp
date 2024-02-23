@@ -19,3 +19,7 @@ Forme::Type Forme::type() const noexcept
 {
 	return _type;
 }
+
+std::string Forme::proprietes_svg() const {
+	return "";
+}

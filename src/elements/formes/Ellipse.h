@@ -7,7 +7,7 @@ public:
     Ellipse(double x1, double y1, double longueur, double hauteur) noexcept: Forme(Type::Ellipse), _x1(x1), _y1(y1), _longueur(longueur), _hauteur(hauteur) {}
     Ellipse(Proprietes prop, double x1, double y1, double longueur, double hauteur) noexcept: Forme(prop, Type::Ellipse), _x1(x1), _y1(y1), _longueur(longueur), _hauteur(hauteur) {}
 
-    std::string to_svg() const override { return ""; }
+    std::string to_svg() const override;
 
 private:
     double _x1;
