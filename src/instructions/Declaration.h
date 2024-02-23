@@ -20,8 +20,8 @@ class Declaration: public Instruction
 
 	public:
 	Declaration(const std::shared_ptr<Contexte> &contexte,
-			std::string nom,
-			std::shared_ptr<Element> val) noexcept:
+			std::shared_ptr<Element> val,
+			std::string nom) noexcept:
 		Instruction(contexte), _nom(nom), _val(val) {}
 
 	Declaration(const std::shared_ptr<Contexte> &contexte, const std::shared_ptr<Carre> &e, const std::string &nom = "") noexcept;

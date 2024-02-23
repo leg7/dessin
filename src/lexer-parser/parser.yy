@@ -67,6 +67,7 @@
 %token KW_TAILLE
 %token KW_COULEUR
 %token KW_ROTATION
+%token DEGREE
 %token KW_REMPLISSAGE
 %token KW_OPACITE
 %token KW_EPAISSEUR
@@ -75,8 +76,6 @@
 %token KW_BOOLEAN
 %token KW_ENTIER
 %token KW_REEL
-
-%token VL_BOOLEAN
 
 %token CARRE
 %token RECTANGLE
@@ -149,28 +148,39 @@ declaration:
 		$1->setProprietes($4);
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($1));
 	}
+	| IDENTIFIANT '=' forme ';' {
+		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($3), $1);
+	}
+	| IDENTIFIANT '=' forme FLECHE proplist_esp ';' {
+		$3->setProprietes($5);
+		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($3), $1);
+	}
+	| IDENTIFIANT '=' forme '{' NL proplist_nl '}' {
+		$3->setProprietes($6);
+		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($3), $1);
+	}
 	| KW_COULEUR IDENTIFIANT '=' couleur ';' {
-		$$ = std::make_unique<Declaration>(driver.contexteCourant, $2, std::move($4));
+		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($4), $2);
 	}
 	| KW_BOOLEAN IDENTIFIANT '=' NOMBRE ';' {
-		$$ = std::make_unique<Declaration>(driver.contexteCourant, $2, std::make_shared<ElementPrimitif<bool>>($4));
+		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::make_shared<ElementPrimitif<bool>>($4), $2);
 	}
 	| KW_ENTIER IDENTIFIANT '=' NOMBRE ';' {
 		if (!estEntier($4)) {
 			std::cout << $4 << "n'est pas entier!\n";
 			exit(69);
 		}
-		$$ = std::make_unique<Declaration>(driver.contexteCourant, $2, std::make_shared<ElementPrimitif<int>>($4));
+		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::make_shared<ElementPrimitif<int>>($4), $2);
 	}
 	| KW_REEL IDENTIFIANT '=' NOMBRE ';' {
 		if (estEntier($4)) {
 			std::cout << $4 << "n'est pas flotant!\n";
 			exit(69);
 		}
-		$$ = std::make_unique<Declaration>(driver.contexteCourant, $2, std::make_shared<ElementPrimitif<double>>($4));
+		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::make_shared<ElementPrimitif<double>>($4), $2);
 	}
 	| KW_TAILLE NOMBRE NOMBRE ';' {
-		$$ = std::make_unique<Declaration>(driver.contexteCourant, "taille", std::make_shared<Taille>($2, $3));
+		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::make_shared<Taille>($2, $3), "taille");
 	}
 
 forme:
@@ -218,7 +228,7 @@ proplist_esp:
 	| KW_OPACITE ':' NOMBRE '%' {
 		$$.opacite = $3 * .01f;
 	}
-	| KW_ROTATION ':' NOMBRE {
+	| KW_ROTATION ':' NOMBRE DEGREE {
 		$$.rotation = fmod($3, 360.0f);
 	}
 	| KW_EPAISSEUR ':' NOMBRE {
@@ -233,7 +243,7 @@ proplist_esp:
 	| KW_OPACITE ':' NOMBRE '%' '&' proplist_esp {
 		$$.opacite = $3 * .01f;
 	}
-	| KW_ROTATION ':' NOMBRE '&' proplist_esp {
+	| KW_ROTATION ':' NOMBRE DEGREE '&' proplist_esp{
 		$$.rotation = fmod($3, 360.0f);
 	}
 	| KW_EPAISSEUR ':' NOMBRE '&' proplist_esp {
@@ -241,34 +251,34 @@ proplist_esp:
 	}
 
 proplist_nl:
-	KW_COULEUR ':' couleur NL {
+	KW_COULEUR ':' couleur ';' NL {
 		$$.couleur = *$3;
 	}
-	| KW_REMPLISSAGE ':' couleur NL {
+	| KW_REMPLISSAGE ':' couleur ';' NL {
 		$$.remplissage = *$3;
 	}
-	| KW_OPACITE ':' NOMBRE '%' NL {
+	| KW_OPACITE ':' NOMBRE '%' ';' NL {
 		$$.opacite = $3 * .01f;
 	}
-	| KW_ROTATION ':' NOMBRE NL {
+	| KW_ROTATION ':' NOMBRE DEGREE ';' NL {
 		$$.rotation = fmod($3, 360.0f);
 	}
-	| KW_EPAISSEUR ':' NOMBRE NL {
+	| KW_EPAISSEUR ':' NOMBRE ';' NL {
 		$$.epaisseur = $3;
 	}
-	| KW_COULEUR ':' couleur NL proplist_nl {
+	| KW_COULEUR ':' couleur ';' NL proplist_nl {
 		$$.couleur = *$3;
 	}
-	| KW_REMPLISSAGE ':' couleur NL proplist_nl {
+	| KW_REMPLISSAGE ':' couleur ';' NL proplist_nl {
 		$$.remplissage = *$3;
 	}
-	| KW_OPACITE ':' NOMBRE '%' NL proplist_nl {
+	| KW_OPACITE ':' NOMBRE '%' ';' NL proplist_nl {
 		$$.opacite = $3 * .01f;
 	}
-	| KW_ROTATION ':' NOMBRE NL proplist_nl {
+	| KW_ROTATION ':' NOMBRE DEGREE ';' NL proplist_nl {
 		$$.rotation = fmod($3, 360.0f);
 	}
-	| KW_EPAISSEUR ':' NOMBRE NL proplist_nl {
+	| KW_EPAISSEUR ':' NOMBRE ';' NL proplist_nl {
 		$$.epaisseur = $3;
 	}
 
@@ -288,6 +298,8 @@ affectation:
 
     }
 
+expression:
+
 appelFonction:
 /*
 	IDENTIFIANT '(' ')' {
@@ -299,6 +311,7 @@ appelFonction:
 */
 
 arglist:
+/*
 	expression {
 		$$ = std::vector<std::shared_ptr<Expression>>(1, std::move($1));
 	}
@@ -306,6 +319,7 @@ arglist:
 		$$ = std::move($1);
 		$$.push_back(std::move($3));
 	}
+*/
 
 boucle:
 	KW_TANTQUE '(' comparaison ')' corps {
@@ -317,7 +331,6 @@ branchement:
 		$$ = std::make_unique<Branchement>(driver.contexteCourant, std::move($3), $5);
 	}
 
-expression:
 corps:
 comparaison:
 

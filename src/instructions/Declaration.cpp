@@ -41,6 +41,7 @@ Declaration::Declaration(const std::shared_ptr<Contexte> &contexte, const std::s
 	_nom_special = "texte[" + std::to_string(contexte->nTextes++) + "]";
 }
 
+// TODO: Utilser l'enum pour incrementer le bon indice automatiquement et un tableau de string avec la bonne chaine pour l'enum
 Declaration::Declaration(const std::shared_ptr<Contexte> &contexte, const std::shared_ptr<Forme> &e, const std::string &nom) noexcept: Instruction(contexte), _nom(nom), _val(e)
 {
 	switch (e->type()) {

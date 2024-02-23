@@ -48,6 +48,7 @@ fin return token::END;
 "{"				 return '{';
 "}"				 return '}';
 "%"				 return '%';
+"°"				 return token::DEGREE;
 
 (?i:carre)		         return token::CARRE;
 (?i:rectangle)	                 return token::RECTANGLE;
