@@ -12,6 +12,7 @@
 %code requires {
 	#include <memory>
 	#include <iostream>
+	#include <cmath>
 
 	#include "instructions/Instructions.h"
 	#include "elements/Couleur.h"
@@ -118,7 +119,7 @@ instruction:
 // TODO: Construire forme puis l'ajouter au contexte de l'AST
 declaration:
 	forme {
-		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($1));
+		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::shared_ptr<Forme>(std::move($1)));
 	}
 	| proplist_esp ';' {
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($1));
@@ -147,7 +148,7 @@ forme:
 		$$ = std::make_unique<Ligne>($2, $3, $4, $5);
 	}
 	| CHEMIN chemin_points {
-		$$ = $2;
+		$$ = std::move($2);
 	}
 	| TEXTE NUMBER NUMBER STRING STRING {
 		$$ = std::make_unique<Texte>($2, $3, $4, $5);
@@ -189,7 +190,7 @@ propriete:
 	}
 	| KW_ROTATION ':' REEL {
 		$$.type = Forme::TypePropriete::Rotation;
-		$$.valeur = std::to_string(mod($3, 360));
+		$$.valeur = std::to_string(fmod($3, 360));
 	}
 	| KW_REMPLISSAGE ':' COULEUR {
 		$$.type = Forme::TypePropriete::Remplissage;

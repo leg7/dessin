@@ -8,6 +8,7 @@ class Carre: public Forme {
 		Carre(Proprietes prop, int x1, int y1, int taille): Forme(prop), _x1(x1), _y1(y1), _taille(taille) {}
 
 		std::string to_svg() const override { return ""; }
+		std::string type() const noexcept override { return "carre"; }
 
 	private:
 		int _x1;

@@ -26,9 +26,10 @@ public:
 	};
 
 public:
-    Forme();
+    Forme(): _prop{"none", "0", "none", "1", "1"} {}
     Forme(Proprietes const& prop): _prop{ "none", "0", "none", "1", "1" } {}
     virtual std::string to_svg() const = 0;
+	virtual std::string type() const noexcept = 0;
     virtual double toDouble() const noexcept override { return 1.0; }
 	void setPropriete(TypePropriete type, std::string const& valeur) { _prop[static_cast<int>(type)] = valeur; }
 

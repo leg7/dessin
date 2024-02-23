@@ -15,6 +15,7 @@ class Chemin: public Forme {
 	Chemin(Proprietes prop, int x1, int y1) : Forme(prop), _points(1, Point{ x1, y1 }) {}
 
 	std::string to_svg() const override { return ""; }
+	std::string type() const noexcept override { return "chemin"; }
 
 	void ajoutePoint(int x, int y);
 

@@ -1,8 +1,15 @@
 #include "Declaration.h"
+#include <string>
 
 void Declaration::executer() const noexcept
 {
 	_contexte->add(_nom, _val);
+}
+
+Declaration::Declaration(const std::shared_ptr<Contexte> &contexte, const std::shared_ptr<Forme> &e) noexcept : Instruction(contexte)
+{
+	_nom = e->type() + "[" + std::to_string(contexte->nCarres++) + "]";
+	_val = e;
 }
 
 Declaration::Declaration(const std::shared_ptr<Contexte> &contexte, const std::shared_ptr<Carre> &e) noexcept: Instruction(contexte)

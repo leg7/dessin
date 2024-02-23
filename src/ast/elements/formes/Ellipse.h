@@ -8,6 +8,7 @@ public:
     Ellipse(Proprietes prop, int x1, int y1, int longueur, int hauteur) : Forme(prop), _x1(x1), _y1(y1), _longueur(longueur), _hauteur(hauteur) {}
 
     std::string to_svg() const override { return ""; }
+	std::string type() const noexcept override { return "ellipse"; }
 
 private:
     int _x1;

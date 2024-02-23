@@ -16,6 +16,7 @@ class Declaration: public Instruction
 			std::shared_ptr<Element> val) noexcept:
 		Instruction(contexte), _nom(nom), _val(val) {}
 
+	Declaration(const std::shared_ptr<Contexte> &contexte, const std::shared_ptr<Forme> &e) noexcept;
 	Declaration(const std::shared_ptr<Contexte> &contexte, const std::shared_ptr<Carre> &e) noexcept;
 	Declaration(const std::shared_ptr<Contexte> &contexte, const std::shared_ptr<Rectangle> &e) noexcept;
 	Declaration(const std::shared_ptr<Contexte> &contexte, const std::shared_ptr<Triangle> &e) noexcept;
