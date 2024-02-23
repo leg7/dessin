@@ -38,8 +38,10 @@ class Couleur: public Element
         Couleur(const uint8_t r, const uint8_t g, const uint8_t b) noexcept:  _r(r), _g(g), _b(b) {};
         Couleur(Nom n) noexcept;
 	  Couleur(uint32_t hexa) noexcept;
+
 	  Couleur(const Couleur &c) noexcept = default;
 	  Couleur& operator=(const Couleur &c) noexcept = default;
+
+	  std::string to_string() const noexcept;
 	  virtual double toDouble() const noexcept override;
-	  std::string to_string() const { return "rgb(" + std::to_string(_r) + "," + std::to_string(_g) + "," + std::to_string(_b) +  ")"; }
 };

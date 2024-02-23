@@ -14,22 +14,20 @@ void Forme::setProprietes(const Proprietes &p) noexcept
 	_prop = p;
 }
 
-void Forme::setPropriete(TypePropriete type, std::string const& valeur) noexcept {
-	_proprietes[static_cast<int>(type)] = valeur;
-}
 
 Forme::Type Forme::type() const noexcept
 {
 	return _type;
 }
 
+
 std::string Forme::proprietes_svg() const {
 	Point c = centre();
-	return "stroke=\"" + _proprietes[static_cast<int>(TypePropriete::Couleur)] + "\" "
-		+ "fill=\"" + _proprietes[static_cast<int>(TypePropriete::Remplissage)] + "\" "
-		+ "stroke-opacity=\"" + _proprietes[static_cast<int>(TypePropriete::Opacite)] + "\" "
-		+ "fill-opacity=\"" + _proprietes[static_cast<int>(TypePropriete::Opacite)] + "\" "
-		+ "stroke-width=\"" + _proprietes[static_cast<int>(TypePropriete::Epaisseur)] + "\" "
-		+ "transform=\"rotate(" + _proprietes[static_cast<int>(TypePropriete::Rotation)] + "," + std::to_string(c.x) + "," + std::to_string(c.y) + ")\" " 
+	return "stroke=\"" + _prop.couleur.to_string() + "\" "
+		+ "fill=\"" + _prop.remplissage.to_string() + "\" "
+		+ "stroke-opacity=\"" + std::to_string(_prop.opacite) + "\" "
+		+ "fill-opacity=\"" + std::to_string(_prop.opacite) + "\" "
+		+ "stroke-width=\"" + std::to_string(_prop.epaisseur) + "\" "
+		+ "transform=\"rotate(" + std::to_string(_prop.rotation) + "," + std::to_string(c.x) + "," + std::to_string(c.y) + ")\" "
 		;
 }

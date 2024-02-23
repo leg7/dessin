@@ -28,14 +28,6 @@ public:
 		float epaisseur = 0;
 	};
 
-	enum class TypePropriete {
-		Couleur,
-		Rotation,
-		Remplissage,
-		Opacite,
-		Epaisseur
-	};
-
 protected:
 	struct Point {
 		double x;
@@ -50,7 +42,6 @@ public:
     virtual double toDouble() const noexcept override;
 
     void setProprietes(const Proprietes &p) noexcept;
-    void setPropriete(TypePropriete type, std::string const& valeur) noexcept;
     Type type() const noexcept;
 
 protected:
@@ -60,7 +51,6 @@ protected:
 private:
     Proprietes _prop;
     Type _type;
-	std::string _proprietes[5];
 };
 
 using FormePtr = std::shared_ptr<Forme>;

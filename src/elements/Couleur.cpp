@@ -40,3 +40,8 @@ double Couleur::toDouble() const noexcept
 
 	return static_cast<double>(tmp);
 }
+
+std::string Couleur::to_string() const noexcept
+{
+	return "rgb(" + std::to_string(_r) + ", " + std::to_string(_g) + ", " + std::to_string(_b);
+}
