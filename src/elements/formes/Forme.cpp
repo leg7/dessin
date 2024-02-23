@@ -24,5 +24,12 @@ Forme::Type Forme::type() const noexcept
 }
 
 std::string Forme::proprietes_svg() const {
-	return "";
+	Point c = centre();
+	return "stroke=\"" + _proprietes[static_cast<int>(TypePropriete::Couleur)] + "\" "
+		+ "fill=\"" + _proprietes[static_cast<int>(TypePropriete::Remplissage)] + "\" "
+		+ "stroke-opacity=\"" + _proprietes[static_cast<int>(TypePropriete::Opacite)] + "\" "
+		+ "fill-opacity=\"" + _proprietes[static_cast<int>(TypePropriete::Opacite)] + "\" "
+		+ "stroke-width=\"" + _proprietes[static_cast<int>(TypePropriete::Epaisseur)] + "\" "
+		+ "transform=\"rotate(" + _proprietes[static_cast<int>(TypePropriete::Rotation)] + "," + std::to_string(c.x) + "," + std::to_string(c.y) + ")\" " 
+		;
 }

@@ -36,6 +36,12 @@ public:
 		Epaisseur
 	};
 
+protected:
+	struct Point {
+		double x;
+		double y;
+	};
+
 public:
     Forme(Type t) noexcept;
     Forme(Proprietes const& prop, Type t) noexcept;
@@ -49,6 +55,7 @@ public:
 
 protected:
 	std::string proprietes_svg() const;
+	virtual Point centre() const = 0;
 
 private:
     Proprietes _prop;

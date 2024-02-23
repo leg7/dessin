@@ -3,7 +3,7 @@
 #include <algorithm>
 
 std::string Chemin::to_svg() const {
-	if (_points.empty()) return "";
+	// Un chemin n'est pas vide, par construction
 
 	std::string result;
 	Point precedent = _points.front();
@@ -21,6 +21,17 @@ std::string Chemin::to_svg() const {
 	});
 
 	return result;
+}
+
+Forme::Point Chemin::centre() const {
+	Point result = _points.front();
+
+	std::for_each(++_points.begin(), _points.end(), [&result] (Point const& p) {
+		result.x += p.x;
+		result.y += p.y;
+	});
+
+	return { result.x / _points.size(), result.y / _points.size() };
 }
 
 void Chemin::ajoutePoint(double x, double y) {

@@ -9,3 +9,7 @@ std::string Ligne::to_svg() const {
 		+ proprietes_svg()
 		+ "/>";
 }
+
+Forme::Point Ligne::centre() const {
+	return Point { (_x1 + _x2) * .5, (_y1 + _y2) * .5 };
+}

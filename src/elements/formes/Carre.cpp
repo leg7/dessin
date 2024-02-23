@@ -9,3 +9,7 @@ std::string Carre::to_svg() const {
 		+ proprietes_svg()
 		+ "/>";
 }
+
+Forme::Point Carre::centre() const {
+	return Point { _x1 + _taille * .5, _y1 + _taille * .5 };
+}

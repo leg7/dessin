@@ -9,3 +9,7 @@ std::string Ellipse::to_svg() const {
 		+ proprietes_svg()
 		+ "/>";
 }
+
+Forme::Point Ellipse::centre() const {
+	return Point {_x1, _y1};
+}

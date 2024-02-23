@@ -11,3 +11,7 @@ std::string Triangle::to_svg() const {
 		+ proprietes_svg()
 		+ "/>";
 }
+
+Forme::Point Triangle::centre() const {
+	return Point { _x1, _y1 / 3. };
+}

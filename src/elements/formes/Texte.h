@@ -11,6 +11,9 @@ public:
 
     std::string to_svg() const override;
 
+protected:
+	Point centre() const override;
+
 private:
     double _x1;
     double _y1;

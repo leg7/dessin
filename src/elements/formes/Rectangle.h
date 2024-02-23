@@ -9,6 +9,9 @@ public:
 
     std::string to_svg() const override;
 
+protected:
+	Point centre() const override;
+
 private:
     double _coordonnees[8];
 };
