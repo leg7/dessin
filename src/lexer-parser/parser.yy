@@ -38,6 +38,8 @@
 
 	class Scanner;
 	class Driver;
+
+	struct AttribPropriete { Forme::TypePropriete type; std::string valeur; };
 }
 
 %parse-param { Scanner &scanner }
@@ -51,8 +53,6 @@
 	#define yylex scanner.yylex
 
 	bool estEntier(double x) { return ceil(x) == x; }
-
-	struct AttribPropriete { Forme::TypePropriete type; std::string valeur; };
 }
 
 %token NL
@@ -114,18 +114,18 @@
 
 %%
 
-espacement:
-	NL espacement
-	| /* epsilon */
-
-separateur:
-	';' | NL espacement
-
 programme:
 	instruction separateur programme
 	| END NL {
 		YYACCEPT;
 	}
+
+espacement:
+	NL espacement
+	| /* epsilon */
+
+separateur:
+	';' espacement | NL espacement
 
 instruction:
 /*
@@ -152,7 +152,7 @@ declaration:
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($1));
 	}
 	| IDENTIFIANT '=' creation_forme {
-		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($3), $1);
+		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::shared_ptr<Forme>(std::move($3)), $1);
 	}
 	| KW_COULEUR IDENTIFIANT '=' couleur ';' {
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($4), $2);
@@ -185,7 +185,7 @@ creation_forme:
 	| proplist_esp ';' {
 		$$ = std::move($1);
 	}
-	| proplist_nl '}' {
+	| proplist_nl espacement '}' {
 		$$ = std::move($1);
 	}
 
