@@ -50,7 +50,7 @@ fin return token::END;
 "%"				 return '%';
 "°"				 return token::DEGREE;
 
-(?i:carre)		         return token::CARRE;
+(?i:carre)|(?i:carré)		         return token::CARRE;
 (?i:rectangle)	                 return token::RECTANGLE;
 (?i:triangle)	                 return token::TRIANGLE;
 (?i:cercle)		         return token::CERCLE;
@@ -59,15 +59,15 @@ fin return token::END;
 (?i:chemin)		         return token::CHEMIN;
 (?i:texte)		         return token::TEXTE;
 
-"taille" return token::KW_TAILLE;
-"couleur" return token::KW_COULEUR;
-"rotation" return token::KW_ROTATION;
-"remplissage" return token::KW_REMPLISSAGE;
-"opacite" return token::KW_OPACITE;
-"epaisseur" return token::KW_EPAISSEUR;
-"booleen" return token::KW_BOOLEAN;
-"entier" return token::KW_ENTIER;
-"reel" return token::KW_REEL;
+(?i:taille) return token::KW_TAILLE;
+(?i:couleur) return token::KW_COULEUR;
+(?i:rotation) return token::KW_ROTATION;
+(?i:remplissage) return token::KW_REMPLISSAGE;
+(?i:opacite)|(?i:opacité) return token::KW_OPACITE;
+(?i:epaisseur)|(?i:épaisseur) return token::KW_EPAISSEUR;
+(?i:booleen)|(?i:booléen) return token::KW_BOOLEAN;
+(?i:entier) return token::KW_ENTIER;
+(?i:reel)|(?i:réel) return token::KW_REEL;
 
 "true" {
 	yylval->build<double>(1);
