@@ -12,6 +12,10 @@ bool Contexte::rm(const std::string &nom) noexcept
 	return _data.erase(nom);
 }
 
+bool Contexte::contains(const std::string &key) const noexcept
+{
+	return _data.contains(key);
+}
 
 std::shared_ptr<Element> Contexte::at(const std::string key) const noexcept
 {

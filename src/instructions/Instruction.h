@@ -8,5 +8,5 @@ class Instruction
 
 	public:
 	Instruction(const std::shared_ptr<Contexte> &c): _contexte(c) {}
-	virtual void executer() const noexcept = 0;
+	virtual void executer() const = 0;
 };

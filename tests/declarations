@@ -17,4 +17,5 @@ booleen b = true;
 entier e = 4;
 reel r = 3.5;
 couleur c = rgb(0,0,255);
+booleen b = false;
 fin

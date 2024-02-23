@@ -19,10 +19,7 @@ class Declaration: public Instruction
 	std::shared_ptr<Element> _val;
 
 	public:
-	Declaration(const std::shared_ptr<Contexte> &contexte,
-			std::shared_ptr<Element> val,
-			std::string nom) noexcept:
-		Instruction(contexte), _nom(nom), _val(val) {}
+	Declaration(const std::shared_ptr<Contexte> &contexte, std::shared_ptr<Element> val, std::string nom);
 
 	Declaration(const std::shared_ptr<Contexte> &contexte, const std::shared_ptr<Carre> &e, const std::string &nom = "") noexcept;
 	Declaration(const std::shared_ptr<Contexte> &contexte, const std::shared_ptr<Rectangle> &e, const std::string &nom = "") noexcept;
@@ -34,5 +31,5 @@ class Declaration: public Instruction
 	Declaration(const std::shared_ptr<Contexte> &contexte, const std::shared_ptr<Texte> &e, const std::string &nom = "") noexcept;
 	Declaration(const std::shared_ptr<Contexte> &contexte, const std::shared_ptr<Forme> &e, const std::string &nom = "") noexcept;
 
-	virtual void executer() const noexcept override;
+	virtual void executer() const override;
 };

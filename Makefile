@@ -1,10 +1,10 @@
-CXX := g++
+CXX := c++
 
 SRCDIR := src
 BUILD_DIR := build
 EXECUTABLE := dessin-cc
 
-CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -ggdb
+CXXFLAGS := -std=c++20 -Wall -Wextra -Wpedantic -ggdb
 
 BISON_OUTPUT := $(SRCDIR)/lexer-parser/parser.cpp $(SRCDIR)/lexer-parser/parser.hpp $(SRCDIR)/lexer-parser/location.hh
 FLEX_OUTPUT := $(SRCDIR)/lexer-parser/scanner.cpp

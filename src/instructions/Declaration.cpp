@@ -1,9 +1,18 @@
 #include "Declaration.h"
+#include <stdexcept>
 
-void Declaration::executer() const noexcept
+Declaration::Declaration(const std::shared_ptr<Contexte> &contexte, std::shared_ptr<Element> val, std::string nom):
+	Instruction(contexte), _nom(nom), _val(val)
+{
+}
+
+void Declaration::executer() const
 {
 	_contexte->add(_nom_special, _val);
 	if (_nom != "") {
+		if (_contexte->contains(_nom)) {
+			throw std::invalid_argument("Impossible de declarer, la variable existe deja");
+		}
 		_contexte->add(_nom, _val);
 	}
 }

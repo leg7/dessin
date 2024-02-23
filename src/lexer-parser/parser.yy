@@ -107,13 +107,15 @@
 %token TEXTE
 %token <std::string> STRING
 
-%type <std::shared_ptr<Declaration>> declaration
+%type <std::unique_ptr<Expression>> expression
+
+%type <std::unique_ptr<Declaration>> declaration
 %type <std::shared_ptr<Forme>> forme
 %type <Forme::Proprietes> proplist_esp
 %type <Forme::Proprietes> proplist_nl
 %type <std::unique_ptr<Couleur>> couleur
 
-%type <std::unique_ptr<Expression>> expression
+%type <std::unique_ptr<Affectation>> affectation
 
 %type <std::unique_ptr<AppelFonction>> appelFonction
 %type <std::vector<std::shared_ptr<Instruction>>> arglist
@@ -146,11 +148,11 @@ instruction:
 	| branchement {
 		driver.ast.add($$);
 	}
-	| affectation {
+*/
+	affectation {
 		driver.ast.add(std::move($$));
 	}
-*/
-	declaration {
+	| declaration {
 		driver.ast.add(std::move($$));
 	}
 	| /* epsilon */
@@ -362,9 +364,9 @@ couleur:
 	 }
 
 affectation:
-    IDENTIFIANT OP_EQ expression {
-
-    }
+	IDENTIFIANT OP_EQ expression {
+		$$ = std::make_unique<Affectation>(driver.contexteCourant, $1, $3->eval());
+	}
 
 
 
