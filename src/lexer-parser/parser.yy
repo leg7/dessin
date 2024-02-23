@@ -23,6 +23,7 @@
 	#include "../instructions/Declaration.h"
 
 	#include "../elements/Couleur.h"
+	#include "../elements/ElementPrimitif.h"
 	#include "../elements/formes/Forme.h"
 	#include "../elements/formes/Carre.h"
 	#include "../elements/formes/Cercle.h"
@@ -47,18 +48,17 @@
 	#undef	yylex
 	#define yylex scanner.yylex
 
+	bool estEntier(double x) { return ceil(x) == x; }
+
 }
 
 %token NL
 %token END
-%token <int> ENTIER
-%token <float> REEL
 %token <double> NOMBRE
-%token FLECHE
 
+%token FLECHE
 %token <Couleur::Nom> COULEUR_NOM
 %token COULEUR_RGB_START
-%token <int> COULEUR_RGB_PART
 %token <uint32_t> COULEUR_HEX
 
 %token <std::string> IDENTIFIANT
@@ -70,6 +70,11 @@
 %token KW_EPAISSEUR
 %token KW_TANTQUE
 %token KW_SI
+%token KW_BOOLEAN
+%token KW_ENTIER
+%token KW_REEL
+
+%token VL_BOOLEAN
 
 %token CARRE
 %token RECTANGLE
@@ -83,10 +88,8 @@
 
 %type <std::shared_ptr<Declaration>> declaration
 %type <std::shared_ptr<Forme>> forme
-// Forme::Proprietes Sythetise
-%type <std::unique_ptr<Forme::Proprietes>> proplist_esp
-%type <std::unique_ptr<Forme::Proprietes>> proplist_nl
-%type <std::unique_ptr<Forme::Proprietes>> propriete
+%type <Forme::Proprietes> proplist_esp
+%type <Forme::Proprietes> proplist_nl
 %type <std::unique_ptr<Couleur>> couleur
 
 %type <std::unique_ptr<AppelFonction>> appelFonction
@@ -130,96 +133,145 @@ instruction:
 	declaration {
 		driver.ast.add(std::move($$));
 	}
+	| /* epsilon */
 
 declaration:
-	forme {
+	forme ';' {
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($1));
 	}
 	| forme FLECHE proplist_esp ';' {
-		$1->setProprietes(*$3);
+		$1->setProprietes($3);
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($1));
 	}
-	| forme '{' proplist_nl '}' {
-		$1->setProprietes(*$3);
+	| forme '{' NL proplist_nl '}' {
+		$1->setProprietes($4);
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($1));
 	}
 	| KW_COULEUR IDENTIFIANT '=' couleur ';' {
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, $2, std::move($4));
 	}
+	| KW_BOOLEAN IDENTIFIANT '=' NOMBRE ';' {
+		$$ = std::make_unique<Declaration>(driver.contexteCourant, $2, std::make_shared<ElementPrimitif<bool>>($4));
+	}
+	| KW_ENTIER IDENTIFIANT '=' NOMBRE ';' {
+		if (!estEntier($4)) {
+			std::cout << $4 << "n'est pas entier!\n";
+			exit(69);
+		}
+		$$ = std::make_unique<Declaration>(driver.contexteCourant, $2, std::make_shared<ElementPrimitif<int>>($4));
+	}
+	| KW_REEL IDENTIFIANT '=' NOMBRE ';' {
+		if (estEntier($4)) {
+			std::cout << $4 << "n'est pas flotant!\n";
+			exit(69);
+		}
+		$$ = std::make_unique<Declaration>(driver.contexteCourant, $2, std::make_shared<ElementPrimitif<double>>($4));
+	}
 
 forme:
-	CARRE ENTIER ENTIER ENTIER {
+	CARRE NOMBRE NOMBRE NOMBRE {
 		$$ = std::make_shared<Carre>($2, $3, $4);
 	}
-	| RECTANGLE ENTIER ENTIER ENTIER ENTIER ENTIER ENTIER ENTIER ENTIER {
+	| RECTANGLE NOMBRE NOMBRE NOMBRE NOMBRE NOMBRE NOMBRE NOMBRE NOMBRE {
 		$$ = std::make_shared<Rectangle>($2, $3, $4, $5, $6, $7, $8, $9);
 	}
-	| TRIANGLE ENTIER ENTIER ENTIER ENTIER {
+	| TRIANGLE NOMBRE NOMBRE NOMBRE NOMBRE {
 		$$ = std::make_shared<Triangle>($2, $3, $4, $5);
 	}
-	| CERCLE ENTIER ENTIER ENTIER {
+	| CERCLE NOMBRE NOMBRE NOMBRE {
 		$$ = std::make_shared<Cercle>($2, $3, $4);
 	}
-	| ELLIPSE ENTIER ENTIER ENTIER ENTIER {
+	| ELLIPSE NOMBRE NOMBRE NOMBRE NOMBRE {
 		$$ = std::make_shared<Ellipse>($2, $3, $4, $5);
 	}
-	| LIGNE ENTIER ENTIER ENTIER ENTIER {
+	| LIGNE NOMBRE NOMBRE NOMBRE NOMBRE {
 		$$ = std::make_shared<Ligne>($2, $3, $4, $5);
 	}
 	| CHEMIN chemin_points {
 		$$ = std::move($2);
 	}
-	| TEXTE ENTIER ENTIER STRING STRING {
+	| TEXTE NOMBRE NOMBRE STRING STRING {
 		$$ = std::make_shared<Texte>($2, $3, $4, $5);
 	}
 
 chemin_points:
-	chemin_points ',' ENTIER ENTIER  {
+	chemin_points ',' NOMBRE NOMBRE  {
 		$$ = std::move($1);
 		$$->ajoutePoint($3, $4);
 	}
-	| ENTIER ENTIER {
+	| NOMBRE NOMBRE {
 		$$ = std::make_unique<Chemin>($1, $2);
 	}
 
 proplist_esp:
-	propriete {
-		$1 = std::move($$);
+	KW_COULEUR ':' couleur {
+		$$.couleur = *$3;
 	}
-	| propriete '&' proplist_esp {
-		$1 = std::move($$);
+	| KW_REMPLISSAGE ':' couleur {
+		$$.remplissage = *$3;
+	}
+	| KW_OPACITE ':' NOMBRE '%' {
+		$$.opacite = $3 * .01f;
+	}
+	| KW_ROTATION ':' NOMBRE {
+		$$.rotation = fmod($3, 360.0f);
+	}
+	| KW_EPAISSEUR ':' NOMBRE {
+		$$.epaisseur = $3;
+	}
+	| KW_COULEUR ':' couleur '&' proplist_esp {
+		$$.couleur = *$3;
+	}
+	| KW_REMPLISSAGE ':' couleur '&' proplist_esp {
+		$$.remplissage = *$3;
+	}
+	| KW_OPACITE ':' NOMBRE '%' '&' proplist_esp {
+		$$.opacite = $3 * .01f;
+	}
+	| KW_ROTATION ':' NOMBRE '&' proplist_esp {
+		$$.rotation = fmod($3, 360.0f);
+	}
+	| KW_EPAISSEUR ':' NOMBRE '&' proplist_esp {
+		$$.epaisseur = $3;
 	}
 
 proplist_nl:
-	propriete {
-		$1 = std::move($$);
+	KW_COULEUR ':' couleur NL {
+		$$.couleur = *$3;
 	}
-	| propriete NL proplist_nl {
-		$1 = std::move($$);
+	| KW_REMPLISSAGE ':' couleur NL {
+		$$.remplissage = *$3;
 	}
-
-propriete:
-	KW_COULEUR ':' couleur {
-		$$->couleur = *$3;
+	| KW_OPACITE ':' NOMBRE '%' NL {
+		$$.opacite = $3 * .01f;
 	}
-	| KW_ROTATION ':' REEL {
-		$$->rotation = fmod($3, 360.0f);
+	| KW_ROTATION ':' NOMBRE NL {
+		$$.rotation = fmod($3, 360.0f);
 	}
-	| KW_REMPLISSAGE ':' couleur {
-		$$->remplissage = *$3;
+	| KW_EPAISSEUR ':' NOMBRE NL {
+		$$.epaisseur = $3;
 	}
-	| KW_OPACITE ':' REEL '%' {
-		$$->opacite = $3 * .01f;
+	| KW_COULEUR ':' couleur NL proplist_nl {
+		$$.couleur = *$3;
 	}
-	| KW_EPAISSEUR ':' REEL {
-		$$->epaisseur = $3;
+	| KW_REMPLISSAGE ':' couleur NL proplist_nl {
+		$$.remplissage = *$3;
+	}
+	| KW_OPACITE ':' NOMBRE '%' NL proplist_nl {
+		$$.opacite = $3 * .01f;
+	}
+	| KW_ROTATION ':' NOMBRE NL proplist_nl {
+		$$.rotation = fmod($3, 360.0f);
+	}
+	| KW_EPAISSEUR ':' NOMBRE NL proplist_nl {
+		$$.epaisseur = $3;
 	}
 
 couleur:
 	 COULEUR_NOM {
 		$$ = std::make_unique<Couleur>($1);
 	 }
-	 | COULEUR_RGB_START COULEUR_RGB_PART ',' COULEUR_RGB_PART ',' COULEUR_RGB_PART ')' {
+	 | COULEUR_RGB_START NOMBRE ',' NOMBRE ',' NOMBRE ')' {
 	 	$$ = std::make_unique<Couleur>($2, $4, $6);
 	 }
 	 | COULEUR_HEX {

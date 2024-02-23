@@ -23,9 +23,9 @@ public:
 	struct Proprietes {
 		Couleur couleur;
 		Couleur remplissage;
-		uint8_t opacite = 0;
+		float opacite = 0;
 		float rotation = 0;
-		uint16_t epaisseur = 0;
+		float epaisseur = 0;
 	};
 
 public:

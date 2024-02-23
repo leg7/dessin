@@ -4,14 +4,14 @@
 
 class Triangle: public Forme {
 public:
-    Triangle(int x1, int y1, int longueur, int hauteur) noexcept: Forme(Type::Triangle), _x1(x1), _y1(y1), _longueur(longueur), _hauteur(hauteur) {}
-    Triangle(Proprietes prop, int x1, int y1, int longueur, int hauteur) noexcept: Forme(prop, Type::Triangle), _x1(x1), _y1(y1), _longueur(longueur), _hauteur(hauteur) {}
+    Triangle(double x1, double y1, double longueur, double hauteur) noexcept: Forme(Type::Triangle), _x1(x1), _y1(y1), _longueur(longueur), _hauteur(hauteur) {}
+    Triangle(Proprietes prop, double x1, double y1, double longueur, double hauteur) noexcept: Forme(prop, Type::Triangle), _x1(x1), _y1(y1), _longueur(longueur), _hauteur(hauteur) {}
 
     std::string to_svg() const override { return ""; }
 
 private:
-    int _x1;
-    int _y1;
-    int _longueur;
-    int _hauteur;
+    double _x1;
+    double _y1;
+    double _longueur;
+    double _hauteur;
 };

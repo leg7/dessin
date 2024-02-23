@@ -1,0 +1,13 @@
+couleur a = rouge;
+couleur b = vert;
+couleur c = bleu;
+couleur d = jaune;
+couleur e = orange;
+couleur f = violet;
+couleur g = magenta;
+couleur h = cyan;
+couleur i = noir;
+couleur j = blanc;
+couleur k = #fa71d0;
+couleur l = rgb(100, 230, 0);
+fin
