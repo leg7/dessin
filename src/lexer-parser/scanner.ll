@@ -41,20 +41,23 @@ fin return token::END;
 ":"				 return ':';
 "&"				 return '&';
 ";"				 return ';';
-"->"			         return token::FLECHE;
+"->"			       return token::FLECHE;
 "{"				 return '{';
 "}"				 return '}';
 "%"				 return '%';
 "°"				 return token::DEGREE;
+"."				 return '.';
+"["				 return '[';
+"]"				 return ']';
 
-(?i:carre)|(?i:carré)		 return token::CARRE;
-(?i:rectangle)	                 return token::RECTANGLE;
-(?i:triangle)	                 return token::TRIANGLE;
-(?i:cercle)		         return token::CERCLE;
-(?i:ellipse)	                 return token::ELLIPSE;
-(?i:ligne)		         return token::LIGNE;
-(?i:chemin)		         return token::CHEMIN;
-(?i:texte)		         return token::TEXTE;
+(?i:carre)|(?i:carré)	   return token::KW_CARRE;
+(?i:rectangle)	         return token::KW_RECTANGLE;
+(?i:triangle)	         return token::KW_TRIANGLE;
+(?i:cercle)		         return token::KW_CERCLE;
+(?i:ellipse)	         return token::KW_ELLIPSE;
+(?i:ligne)		         return token::KW_LIGNE;
+(?i:chemin)		         return token::KW_CHEMIN;
+(?i:texte)		         return token::KW_TEXTE;
 
 (?i:taille) return token::KW_TAILLE;
 (?i:couleur) return token::KW_COULEUR;
@@ -62,10 +65,20 @@ fin return token::END;
 (?i:remplissage) return token::KW_REMPLISSAGE;
 (?i:opacite)|(?i:opacité) return token::KW_OPACITE;
 (?i:epaisseur)|(?i:épaisseur) return token::KW_EPAISSEUR;
+(?i:positionX) return token::KW_POSX;
+(?i:positionY) return token::KW_POSY;
+(?i:positionX1) return token::KW_POSX1;
+(?i:positionY1) return token::KW_POSY1;
+(?i:positionX2) return token::KW_POSX2;
+(?i:positionY2) return token::KW_POSY2;
+(?i:positionX3) return token::KW_POSX3;
+(?i:positionY3) return token::KW_POSY3;
+(?i:positionX4) return token::KW_POSX4;
+(?i:positionY4) return token::KW_POSY4;
+
 (?i:booleen)|(?i:booléen) return token::KW_BOOLEAN;
 (?i:entier) return token::KW_ENTIER;
 (?i:reel)|(?i:réel) return token::KW_REEL;
-
 
 
 "+" {

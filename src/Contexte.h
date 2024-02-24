@@ -3,33 +3,23 @@
 #include <string>
 #include <memory>
 #include "elements/Element.h"
-#include "elements/formes/Carre.h"
-#include "elements/formes/Cercle.h"
-#include "elements/formes/Chemin.h"
-#include "elements/formes/Ellipse.h"
-#include "elements/formes/Ligne.h"
-#include "elements/formes/Rectangle.h"
-#include "elements/formes/Texte.h"
-#include "elements/formes/Triangle.h"
+#include "elements/formes/Forme.h"
+#include <cstring>
 
 class Contexte
 {
 	std::map<std::string, std::shared_ptr<Element>> _data;
+	size_t _compteurDeFormes[Element::nombreDeFormes];
 
 	public:
-	int nCarres = 0, nRectangles = 0, nTriangles = 0, nCercles = 0, nEllipses = 0, nLignes = 0, nChemins = 0, nTextes = 0;
+	Contexte() { memset(&_compteurDeFormes, 0, Element::nombreDeFormes * sizeof(size_t)); }
+
 	bool add(const std::string &nom, const std::shared_ptr<Element> &e) noexcept;
 	bool rm(const std::string &nom) noexcept;
 	bool contains(const std::string &key) const noexcept;
 	std::shared_ptr<Element> at(const std::string key) const noexcept;
 
-	std::shared_ptr<Carre> getCarre(const int i) const noexcept;
-	std::shared_ptr<Rectangle> getRectangle(const int i) const noexcept;
-	std::shared_ptr<Triangle> getTriangle(const int i) const noexcept;
-	std::shared_ptr<Cercle> getCercle(const int i) const noexcept;
-	std::shared_ptr<Ellipse> getEllipse(const int i) const noexcept;
-	std::shared_ptr<Ligne> getLigne(const int i) const noexcept;
-	std::shared_ptr<Chemin> getChemin(const int i) const noexcept;
-	std::shared_ptr<Texte> getTexte(const int i) const noexcept;
+	std::shared_ptr<Forme> getForme(const Element::Type t, const int num) noexcept;
+	std::shared_ptr<Forme> addForme(const std::shared_ptr<Forme> &f) noexcept;
 };
 

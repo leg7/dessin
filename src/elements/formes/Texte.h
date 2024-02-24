@@ -6,17 +6,15 @@
 
 class Texte: public Forme {
 public:
-    Texte(double x1, double y1, std::string const& texte, std::string const& police) noexcept: Forme(Type::Texte), _x1(x1), _y1(y1), _texte(texte), _police(police) {}
-    Texte(Proprietes prop, double x1, double y1, std::string const& texte, std::string const& police) noexcept: Forme(prop, Type::Texte), _x1(x1), _y1(y1), _texte(texte), _police(police) {}
+    Texte(double x1, double y1, std::string const& texte, std::string const& police) noexcept: _texte(texte), _police(police) { _points = { {x1, y1}}; }
 
+    virtual Type type() const noexcept override { return Type::Texte; }
     std::string to_svg() const override;
 
 protected:
 	Point centre() const override;
 
 private:
-    double _x1;
-    double _y1;
     std::string _texte;
     std::string _police;
 };

@@ -4,16 +4,13 @@
 
 class Carre: public Forme {
 	public:
-		Carre(double x1, double y1, double taille) noexcept: Forme(Type::Carre), _x1(x1), _y1(y1), _taille(taille) {}
-		Carre(Proprietes prop, double x1, double y1, double taille) noexcept: Forme(prop, Type::Carre), _x1(x1), _y1(y1), _taille(taille) {}
+		Carre(double x1, double y1, double taille) noexcept: _taille(taille) { _points = { {x1, y1} }; }
 
+		virtual Type type() const noexcept override { return Type::Carre; }
 		std::string to_svg() const override;
+		void setPropriete(const messageSetPropriete &m) noexcept;
 
 	protected:
 		Point centre() const override;
-
-	private:
-		double _x1;
-		double _y1;
 		double _taille;
 };

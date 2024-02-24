@@ -2,16 +2,16 @@
 
 std::string Triangle::to_svg() const {
 	return std::string("<polygon ")
-		+ "x1=\"" + std::to_string(_x1) + "\" "
-		+ "y1=\"" + std::to_string(_y1 - _hauteur) + "\" "
-		+ "x2=\"" + std::to_string(_x1 - _longueur * .5) + "\" "
-		+ "y2=\"" + std::to_string(_y1) + "\" "
-		+ "x3=\"" + std::to_string(_x1 + _longueur * .5) + "\" "
-		+ "y3=\"" + std::to_string(_y1) + "\" "
+		+ "x1=\"" + std::to_string(_points[0].x) + "\" "
+		+ "y1=\"" + std::to_string(_points[0].y - _hauteur) + "\" "
+		+ "x2=\"" + std::to_string(_points[0].x - _longueur * .5) + "\" "
+		+ "y2=\"" + std::to_string(_points[0].y) + "\" "
+		+ "x3=\"" + std::to_string(_points[0].x + _longueur * .5) + "\" "
+		+ "y3=\"" + std::to_string(_points[0].y) + "\" "
 		+ proprietes_svg()
 		+ "/>";
 }
 
 Forme::Point Triangle::centre() const {
-	return Point { _x1, _y1 / 3. };
+	return Point { _points[0].x, _points[0].y / 3. };
 }

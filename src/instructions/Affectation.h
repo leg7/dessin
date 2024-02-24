@@ -5,10 +5,9 @@
 
 class Affectation: public Instruction
 {
+	protected:
 	std::string _nom;
-	std::shared_ptr<Element> _elem;
 
-	public:
-	Affectation(const std::shared_ptr<Contexte> &contexte, const std::string &nom, const std::shared_ptr<Element> &elem);
-	virtual void executer() const override;
+	Affectation(const std::shared_ptr<Contexte> &contexte, const std::string &nom);
+	virtual void executer() const override = 0;
 };

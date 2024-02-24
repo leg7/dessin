@@ -1,33 +1,50 @@
 #include "Forme.h"
 
-Forme::Forme(Type t) noexcept: _type(t) {}
-
-Forme::Forme(Proprietes const& prop, Type t) noexcept: _prop(prop), _type(t) {}
-
 double Forme::toDouble() const noexcept
 {
 	return 1.0;
 }
 
-void Forme::setProprietes(const Proprietes &p) noexcept
+Forme::messageSetPropriete::messageSetPropriete(const messageSetPropriete &m)
 {
-	_prop = p;
+	if (isFloatPropriete(m.propriete)) {
+		f = m.f;
+	} else if (isCouleurPropriete(m.propriete)) {
+		c = m.c;
+	} else {
+		pointData.val = m.pointData.val;
+		pointData.ind = m.pointData.ind;
+		pointData.isX = m.pointData.isX;
+	}
+	propriete = m.propriete;
 }
 
-
-Forme::Type Forme::type() const noexcept
+void Forme::setPropriete(const messageSetPropriete &m) noexcept
 {
-	return _type;
+	switch (m.propriete) {
+		case Propriete::Point: if (m.pointData.isX) _points[m.pointData.ind].x = m.pointData.val; else _points[m.pointData.ind].y = m.pointData.val; break;
+		case Propriete::Opacite: _opacite = m.f; break;
+		case Propriete::Rotation: _rotation = m.f; break;
+		case Propriete::Epaisseur: _epaisseur = m.f; break;
+		case Propriete::Couleur: _couleur = m.c; break;
+		case Propriete::Remplissage: _remplissage = m.c; break;
+		default: exit(69);
+	}
 }
 
+bool Forme::isCouleurPropriete(Propriete p) noexcept
+{
+	const auto tmp = static_cast<int>(p);
+	return tmp >= enumProprieteCouleurStart && tmp < enumProprieteFloatStart;
+}
 
 std::string Forme::proprietes_svg() const {
 	Point c = centre();
-	return "stroke=\"" + _prop.couleur.to_string() + "\" "
-		+ "fill=\"" + _prop.remplissage.to_string() + "\" "
-		+ "stroke-opacity=\"" + std::to_string(_prop.opacite) + "\" "
-		+ "fill-opacity=\"" + std::to_string(_prop.opacite) + "\" "
-		+ "stroke-width=\"" + std::to_string(_prop.epaisseur) + "\" "
-		+ "transform=\"rotate(" + std::to_string(_prop.rotation) + "," + std::to_string(c.x) + "," + std::to_string(c.y) + ")\" "
+	return "stroke=\"" + _couleur.to_string() + "\" "
+		+ "fill=\"" + _remplissage.to_string() + "\" "
+		+ "stroke-opacity=\"" + std::to_string(_opacite) + "\" "
+		+ "fill-opacity=\"" + std::to_string(_opacite) + "\" "
+		+ "stroke-width=\"" + std::to_string(_epaisseur) + "\" "
+		+ "transform=\"rotate(" + std::to_string(_rotation) + "," + std::to_string(c.x) + "," + std::to_string(c.y) + ")\" "
 		;
 }

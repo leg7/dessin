@@ -44,4 +44,5 @@ class Couleur: public Element
 
 	  std::string to_string() const noexcept;
 	  virtual double toDouble() const noexcept override;
+	  virtual Type type() const noexcept override { return Type::Couleur; }
 };

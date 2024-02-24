@@ -2,8 +2,8 @@
 
 std::string Texte::to_svg() const {
 	return std::string("<text ")
-		+ "x=\"" + std::to_string(_x1) + "\" "
-		+ "y=\"" + std::to_string(_y1) + "\" "
+		+ "x=\"" + std::to_string(_points[0].x) + "\" "
+		+ "y=\"" + std::to_string(_points[0].y) + "\" "
 		+ "font-family=\"" + _police + "\" "
 		+ "text-anchor=\"middle\" dominant-baseline=\"central\" "
 		+ proprietes_svg()
@@ -13,5 +13,5 @@ std::string Texte::to_svg() const {
 }
 
 Forme::Point Texte::centre() const {
-	return Point { _x1, _y1 };
+	return Point { _points[0].x, _points[0].y };
 }
