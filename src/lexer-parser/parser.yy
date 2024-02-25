@@ -5,6 +5,7 @@
 %define api.parser.class { Parser }
 %define api.value.type variant
 %define parse.assert
+%define parse.trace
 %language "c++"
 
 %locations
@@ -22,7 +23,7 @@
 	#include "../expressions/Propriete.h"
 
 	#include "../instructions/Instruction.h"
-	#include "../instructions/AffectationElement.h"
+	#include "../instructions/AffectationExpression.h"
 	#include "../instructions/AffectationPropriete.h"
 	#include "../instructions/AppelFonction.h"
 	#include "../instructions/Boucle.h"
@@ -102,6 +103,8 @@
 %token KW_POSY3
 %token KW_POSX4
 %token KW_POSY4
+%token KW_LARGEUR
+%token KW_HAUTEUR
 
 %token KW_BOOLEAN
 %token KW_ENTIER
@@ -171,9 +174,8 @@
 
 
 programme:
-	instruction programme
-	| instruction NL programme
-	| NL
+	instruction NL programme
+	| NL programme
 	| END NL {
 		YYACCEPT;
 	}
@@ -181,9 +183,6 @@ programme:
 instruction:
 /*
 	| appelFonction {
-		driver.ast.add($$);
-	}
-	| boucle {
 		driver.ast.add($$);
 	}
 */
@@ -194,6 +193,9 @@ instruction:
 		driver.ast.add(std::move($$));
 	}
 	| affectation ';' {
+		driver.ast.add(std::move($$));
+	}
+	| boucle {
 		driver.ast.add(std::move($$));
 	}
 
@@ -283,6 +285,14 @@ expression:
 	}
 	| IDENTIFIANT '.' KW_POSY4 {
 		$$ = std::make_unique<Propriete>(driver.contexteCourant, $1, Forme::Propriete::Point, 3, false);
+	}
+	| IDENTIFIANT '.' KW_LARGEUR {
+		// TODO
+		$$ = std::make_unique<Constante>(std::make_shared<ElementPrimitif<double>>(1));
+	}
+	| IDENTIFIANT '.' KW_HAUTEUR {
+		// TODO
+		$$ = std::make_unique<Constante>(std::make_shared<ElementPrimitif<double>>(1));
 	}
 	| IDENTIFIANT '.' KW_TAILLE {
 		const auto tmp = driver.contexteCourant->at($1);
@@ -445,7 +455,7 @@ affectation:
 		$$ = std::make_unique<AffectationPropriete>(driver.contexteCourant, $1, *$3);
 	}
 	| IDENTIFIANT OP_AFF expression {
-		$$ = std::make_unique<AffectationElement>(driver.contexteCourant, $1, $3->eval());
+		$$ = std::make_unique<AffectationExpression>(driver.contexteCourant, $1, std::move($3));
 	}
 	| KW_CARRE '[' expression ']' '.' affectation_propriete {
 		const auto i = $3->eval()->toDouble();
@@ -549,12 +559,10 @@ affectation_propriete_couleur:
 	}
 
 branchement:
-	KW_SI expression KW_ALORS '{' NL then '}' NL KW_SINON '{' NL then '}' NL {
-		std::cerr << "if-else\n";
+	KW_SI expression KW_ALORS '{' NL then '}' NL KW_SINON '{' NL then '}' {
 		$$ = std::make_unique<Branchement>(driver.contexteCourant, std::move($2), $6, $12);
 	}
 	| KW_SI expression KW_ALORS '{' NL then '}' NL {
-		std::cerr << "if\n";
 		$$ = std::make_unique<Branchement>(driver.contexteCourant, std::move($2), $6);
 	}
 
@@ -566,6 +574,10 @@ then:
 		$$.push_back(std::move($1));
 	}
 
+boucle:
+	KW_TANTQUE expression '{' NL then '}' {
+		$$ = std::make_unique<Boucle>(driver.contexteCourant, std::move($2), $5);
+	}
 
 appelFonction:
 /*
@@ -588,10 +600,6 @@ arglist:
 	}
 */
 
-boucle:
-	KW_TANTQUE '(' expression ')' then {
-		$$ = std::make_unique<Boucle>(driver.contexteCourant, std::move($3), $5);
-	}
 
 %%
 

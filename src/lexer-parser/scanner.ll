@@ -75,6 +75,9 @@ fin return token::END;
 (?i:positionY3) return token::KW_POSY3;
 (?i:positionX4) return token::KW_POSX4;
 (?i:positionY4) return token::KW_POSY4;
+(?i:hauteur) return token::KW_HAUTEUR;
+(?i:largeur) return token::KW_LARGEUR;
+(?i:tant\ que\ ) return token::KW_TANTQUE;
 
 (?i:booleen)|(?i:booléen) return token::KW_BOOLEAN;
 (?i:entier) return token::KW_ENTIER;

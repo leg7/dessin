@@ -6,8 +6,8 @@ ellipse 1 1 2 3;
 ligne 1 1 2 2;
 chemin 1 1, 2 2, 3 3;
 texte 1 1 "texte" "police d'écriture";
-
 carre 0 0 50 -> couleur : rouge & opacite : 30%;
+
 carre 0 0 50 {
   couleur : rouge;
   opacite : 30%;

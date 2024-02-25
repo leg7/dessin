@@ -6,6 +6,7 @@
 
 #include <cstring>
 
+
 int main( int  argc, char* argv[]) {
 	Driver * driver = new Driver();
 	Scanner * scanner = new Scanner(std::cin, std::cout);
