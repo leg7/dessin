@@ -57,23 +57,6 @@
 
 	#undef	yylex
 	#define yylex scanner.yylex
-
-	bool estEntier(double x) { return ceil(x) == x; }
-	void assertEntier(double x)
-	{
-		if (!estEntier(x)) {
-			std::cerr << x << "n'est pas entier!\n";
-			exit(69);
-		}
-	}
-
-	void assertFlotant(double x)
-	{
-		if (estEntier(x)) {
-			std::cerr << x << "n'est pas flotant!\n";
-			exit(420);
-		}
-	}
 }
 
 %token NL

@@ -1,4 +1,5 @@
 #include "Ast.h"
+#include <iostream>
 
 void Ast::executer() const noexcept
 {
@@ -7,7 +8,7 @@ void Ast::executer() const noexcept
 	}
 }
 
-void Ast::add(std::shared_ptr<Instruction> _i) noexcept
+void Ast::add(const std::shared_ptr<Instruction> &_i) noexcept
 {
 	_data.push_back(_i);
 }

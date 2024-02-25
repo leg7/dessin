@@ -7,6 +7,6 @@ class Ast
 {
 	std::vector<std::shared_ptr<Instruction>> _data;
 	public:
-	void add(std::shared_ptr<Instruction> _i) noexcept;
+	void add(const std::shared_ptr<Instruction> &_i) noexcept;
 	void executer() const noexcept;
 };

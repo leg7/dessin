@@ -1,4 +1,5 @@
 #include "Contexte.h"
+#include <iostream>
 #include <memory>
 #include <stdexcept>
 
@@ -53,3 +54,11 @@ std::shared_ptr<Forme> Contexte::atForme(const std::string key) const
 	}
 }
 
+void Contexte::to_svg() const noexcept
+{
+	for (size_t i = 0; i < Element::nombreDeFormes; ++i) {
+		for (size_t j = 0; j < _compteurDeFormes[i]; ++j) {
+			std::cout << std::dynamic_pointer_cast<Forme>(_data.at(Element::nomFormes[i] + j))->to_svg();
+		}
+	}
+}
