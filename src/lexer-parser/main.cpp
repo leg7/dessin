@@ -15,8 +15,8 @@ int main( int  argc, char* argv[]) {
 	parser->parse();
 
 
-	driver->ast.executer();
-	driver->contexteCourant->to_svg();
+	//driver->ast.executer();
+	//driver->contexteCourant->to_svg();
 
 	return 0;
 }

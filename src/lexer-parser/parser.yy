@@ -171,10 +171,7 @@ programme:
 	}
 
 instruction:
-	appel_fonction {
-		driver.ast.add(std::move($1));
-	}
-	| branchement {
+	branchement {
 		driver.ast.add(std::move($1));
 	}
 	| declaration {
@@ -186,6 +183,11 @@ instruction:
 	| boucle {
 		driver.ast.add(std::move($1));
 	}
+	/*
+	appel_fonction {
+		driver.ast.add(std::move($1));
+	}
+	*/
 
 expression:
 	'(' expression ')' {
@@ -340,9 +342,11 @@ declaration:
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::make_shared<Taille>(std::move($2), std::move($3)), "taille");
 		*/
 	}
+	/*
 	| KW_FONCTION IDENTIFIANT '(' arglist ')' '{' NL then '}' {
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::make_shared<Fonction>(driver.contexteCourant, std::move($4), $8));
 	}
+	*/
 
 forme:
 	KW_CARRE expression expression expression {

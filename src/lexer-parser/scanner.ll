@@ -97,7 +97,7 @@ fin return token::END;
 	return token::OP_ADD;
 }
 "-" {
-	'-';
+	return '-';
 }
 "*" {
 	yylval->build<ExpressionBinaire::Operation>(ExpressionBinaire::Operation::MUL);
