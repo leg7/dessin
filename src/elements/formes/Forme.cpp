@@ -1,50 +1,37 @@
 #include "Forme.h"
+#include "../Couleur.h"
+#include <cmath>
+
+void Forme::recevoirMessage(const messageSetPropriete &m)
+{
+	if (m.propriete == Propriete::Point && m.indexPoint >= 0) {
+		_points[m.indexPoint] = m.valeure;
+	} else {
+		_proprietesStandard[static_cast<int8_t>(m.propriete)] = m.valeure;
+	}
+}
+
+std::shared_ptr<Expression> Forme::getPropriete(Propriete p, int indexPoint)
+{
+	if (p == Propriete::Point && indexPoint >= 0) {
+		return _points[indexPoint];
+	} else {
+		return _proprietesStandard[static_cast<int8_t>(p)];
+	}
+}
 
 double Forme::toDouble() const noexcept
 {
 	return 1.0;
 }
 
-Forme::messageSetPropriete::messageSetPropriete(const messageSetPropriete &m)
-{
-	if (isFloatPropriete(m.propriete)) {
-		f = m.f;
-	} else if (isCouleurPropriete(m.propriete)) {
-		c = m.c;
-	} else {
-		pointData.val = m.pointData.val;
-		pointData.ind = m.pointData.ind;
-		pointData.isX = m.pointData.isX;
-	}
-	propriete = m.propriete;
-}
-
-void Forme::setPropriete(const messageSetPropriete &m) noexcept
-{
-	switch (m.propriete) {
-		case Propriete::Point: if (m.pointData.isX) _points[m.pointData.ind].x = m.pointData.val; else _points[m.pointData.ind].y = m.pointData.val; break;
-		case Propriete::Opacite: _opacite = m.f; break;
-		case Propriete::Rotation: _rotation = m.f; break;
-		case Propriete::Epaisseur: _epaisseur = m.f; break;
-		case Propriete::Couleur: _couleur = m.c; break;
-		case Propriete::Remplissage: _remplissage = m.c; break;
-		default: exit(69);
-	}
-}
-
-bool Forme::isCouleurPropriete(Propriete p) noexcept
-{
-	const auto tmp = static_cast<int>(p);
-	return tmp >= enumProprieteCouleurStart && tmp < enumProprieteFloatStart;
-}
-
 std::string Forme::proprietes_svg() const {
 	Point c = centre();
-	return "stroke=\"" + _couleur.to_string() + "\" "
-		+ "fill=\"" + _remplissage.to_string() + "\" "
-		+ "stroke-opacity=\"" + std::to_string(_opacite.toDouble()) + "\" "
-		+ "fill-opacity=\"" + std::to_string(_opacite.toDouble()) + "\" "
-		+ "stroke-width=\"" + std::to_string(_epaisseur.toDouble()) + "\" "
-		+ "transform=\"rotate(" + std::to_string(_rotation.toDouble()) + "," + std::to_string(c.x.toDouble()) + "," + std::to_string(c.y.toDouble()) + ")\" "
+	return "stroke=\"" + std::dynamic_pointer_cast<Couleur>(couleur()->eval())->to_string() + "\" "
+		+ "fill=\"" + std::dynamic_pointer_cast<Couleur>(remplissage()->eval())->to_string() + "\" "
+		+ "stroke-opacity=\"" + std::to_string(opacite()->eval()->toDouble() * 0.01) + "\" "
+		+ "fill-opacity=\"" + std::to_string(opacite()->eval()->toDouble()) + "\" "
+		+ "stroke-width=\"" + std::to_string(epaisseur()->eval()->toDouble()) + "\" "
+		+ "transform=\"rotate(" + std::to_string(fmod(rotation()->eval()->toDouble(), 360.0)) + "," + std::to_string(c.x) + "," + std::to_string(c.y) + ")\" "
 		;
 }

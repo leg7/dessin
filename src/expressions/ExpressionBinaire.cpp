@@ -1,5 +1,4 @@
 #include "ExpressionBinaire.h"
-#include "../elements/ElementPrimitif.h"
 #include <memory>
 
 std::shared_ptr<Element> ExpressionBinaire::eval() const noexcept
@@ -19,6 +18,6 @@ std::shared_ptr<Element> ExpressionBinaire::eval() const noexcept
 		case Operation::AND: result = _gauche->eval()->toDouble() && _droite->eval()->toDouble(); break;
 		case Operation::OR:  result = _gauche->eval()->toDouble() || _droite->eval()->toDouble(); break;
 	}
-	return std::make_shared<ElementPrimitif<double>>(result);
+	return nullptr;
 }
 

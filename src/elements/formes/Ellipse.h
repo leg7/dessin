@@ -4,7 +4,11 @@
 
 class Ellipse: public Forme {
 public:
-    Ellipse(double x1, double y1, double longueur, double hauteur) noexcept: _longueur(longueur), _hauteur(hauteur) { _points = { Point{ x1, y1 } }; }
+    Ellipse(const std::shared_ptr<Expression> & x1,
+		const std::shared_ptr<Expression> & y1,
+		const std::shared_ptr<Expression> & longueur,
+		const std::shared_ptr<Expression> & hauteur) noexcept:
+	    _longueur(longueur), _hauteur(hauteur) { _points = { { x1, y1 } }; }
 
     std::string to_svg() const override;
     virtual Type type() const noexcept override { return Type::Ellipse; }
@@ -13,6 +17,6 @@ protected:
 	Point centre() const override;
 
 private:
-    double _longueur;
-    double _hauteur;
+    std::shared_ptr<Expression> _longueur;
+    std::shared_ptr<Expression> _hauteur;
 };

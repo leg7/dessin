@@ -5,7 +5,6 @@
 %define api.parser.class { Parser }
 %define api.value.type variant
 %define parse.assert
-%define parse.trace
 %language "c++"
 
 %locations
@@ -32,7 +31,7 @@
 
 	#include "../elements/Taille.h"
 	#include "../elements/Couleur.h"
-	#include "../elements/ElementPrimitif.h"
+	#include "../elements/ElementSimple.h"
 	#include "../elements/formes/Forme.h"
 	#include "../elements/formes/Carre.h"
 	#include "../elements/formes/Cercle.h"
@@ -45,8 +44,10 @@
 
 	class Scanner;
 	class Driver;
+	#define YYDEBUG 1
 }
 
+%define parse.trace
 %parse-param { Scanner &scanner }
 %parse-param { Driver &driver }
 
@@ -115,6 +116,8 @@
 %token KW_SINON
 
 %token KW_TANTQUE
+%token KW_REPETE
+%token KW_FOIS
 
 %token OP_AFF
 %token <ExpressionBinaire::Operation> OP_ADD
@@ -257,42 +260,42 @@ expression:
 		$$ = std::make_unique<Propriete>(driver.contexteCourant, $1, Forme::Propriete::Epaisseur);
 	}
 	| IDENTIFIANT '.' KW_POSX {
-		$$ = std::make_unique<Propriete>(driver.contexteCourant, $1, Forme::Propriete::Point, 0, true);
+		$$ = std::make_unique<Propriete>(driver.contexteCourant, $1, Forme::Propriete::Point, 0);
 	}
 	| IDENTIFIANT '.' KW_POSY {
-		$$ = std::make_unique<Propriete>(driver.contexteCourant, $1, Forme::Propriete::Point, 0, false);
+		$$ = std::make_unique<Propriete>(driver.contexteCourant, $1, Forme::Propriete::Point, 1);
 	}
 	| IDENTIFIANT '.' KW_POSX1 {
-		$$ = std::make_unique<Propriete>(driver.contexteCourant, $1, Forme::Propriete::Point, 0, true);
+		$$ = std::make_unique<Propriete>(driver.contexteCourant, $1, Forme::Propriete::Point, 0);
 	}
 	| IDENTIFIANT '.' KW_POSY1 {
-		$$ = std::make_unique<Propriete>(driver.contexteCourant, $1, Forme::Propriete::Point, 0, false);
+		$$ = std::make_unique<Propriete>(driver.contexteCourant, $1, Forme::Propriete::Point, 1);
 	}
 	| IDENTIFIANT '.' KW_POSX2 {
-		$$ = std::make_unique<Propriete>(driver.contexteCourant, $1, Forme::Propriete::Point, 1, true);
+		$$ = std::make_unique<Propriete>(driver.contexteCourant, $1, Forme::Propriete::Point, 2);
 	}
 	| IDENTIFIANT '.' KW_POSY2 {
-		$$ = std::make_unique<Propriete>(driver.contexteCourant, $1, Forme::Propriete::Point, 1, false);
+		$$ = std::make_unique<Propriete>(driver.contexteCourant, $1, Forme::Propriete::Point, 3);
 	}
 	| IDENTIFIANT '.' KW_POSX3 {
-		$$ = std::make_unique<Propriete>(driver.contexteCourant, $1, Forme::Propriete::Point, 2, true);
+		$$ = std::make_unique<Propriete>(driver.contexteCourant, $1, Forme::Propriete::Point, 4);
 	}
 	| IDENTIFIANT '.' KW_POSY3 {
-		$$ = std::make_unique<Propriete>(driver.contexteCourant, $1, Forme::Propriete::Point, 2, false);
+		$$ = std::make_unique<Propriete>(driver.contexteCourant, $1, Forme::Propriete::Point, 5);
 	}
 	| IDENTIFIANT '.' KW_POSX4 {
-		$$ = std::make_unique<Propriete>(driver.contexteCourant, $1, Forme::Propriete::Point, 3, true);
+		$$ = std::make_unique<Propriete>(driver.contexteCourant, $1, Forme::Propriete::Point, 6);
 	}
 	| IDENTIFIANT '.' KW_POSY4 {
-		$$ = std::make_unique<Propriete>(driver.contexteCourant, $1, Forme::Propriete::Point, 3, false);
+		$$ = std::make_unique<Propriete>(driver.contexteCourant, $1, Forme::Propriete::Point, 7);
 	}
 	| IDENTIFIANT '.' KW_LARGEUR {
 		// TODO
-		$$ = std::make_unique<Constante>(std::make_shared<ElementPrimitif<double>>(1));
+		$$ = std::make_unique<Constante>(1);
 	}
 	| IDENTIFIANT '.' KW_HAUTEUR {
 		// TODO
-		$$ = std::make_unique<Constante>(std::make_shared<ElementPrimitif<double>>(1));
+		$$ = std::make_unique<Constante>(1);
 	}
 	| IDENTIFIANT '.' KW_TAILLE {
 		const auto tmp = driver.contexteCourant->at($1);
@@ -306,7 +309,7 @@ expression:
 		 $$ = std::make_unique<Variable>(driver.contexteCourant, $1);
 	}
 	| NOMBRE {
-		 $$ = std::make_unique<Constante>(std::make_shared<ElementPrimitif<double>>($1));
+		 $$ = std::make_unique<Constante>($1);
 	}
 	| couleur {
 		$$ = std::make_unique<Constante>(std::move($1));
@@ -317,80 +320,76 @@ declaration:
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($1));
 	}
 	| forme FLECHE proplist_esp ';' {
-		$1->setPropriete(*$3);
+		$1->recevoirMessage(*$3);
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($1));
 	}
 	| forme '{' NL proplist_nl '}' {
-		$1->setPropriete(*$4);
+		$1->recevoirMessage(*$4);
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($1));
 	}
 	| IDENTIFIANT OP_AFF forme ';' {
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($3), $1);
 	}
 	| IDENTIFIANT OP_AFF forme FLECHE proplist_esp ';' {
-		$3->setPropriete(*$5);
+		$3->recevoirMessage(*$5);
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($3), $1);
 	}
 	| IDENTIFIANT OP_AFF forme '{' NL proplist_nl '}' {
-		$3->setPropriete(*$6);
+		$3->recevoirMessage(*$6);
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($3), $1);
 	}
 	| KW_COULEUR IDENTIFIANT OP_AFF couleur ';' {
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::move($4), $2);
 	}
 	| KW_BOOLEAN IDENTIFIANT OP_AFF expression ';' {
-		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::make_shared<ElementPrimitif<bool>>($4->eval()->toDouble()), $2);
+		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::make_shared<ElementSimple>(std::move($4)), $2);
 	}
 	| KW_ENTIER IDENTIFIANT OP_AFF expression ';' {
-		const auto tmp = $4->eval()->toDouble();
-		assertEntier(tmp);
-		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::make_shared<ElementPrimitif<int>>(tmp), $2);
+		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::make_shared<ElementSimple>(std::move($4)), $2);
 	}
 	| KW_REEL IDENTIFIANT OP_AFF expression ';' {
-		const auto tmp = $4->eval()->toDouble();
-		assertFlotant(tmp);
-		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::make_shared<ElementPrimitif<double>>(tmp), $2);
+		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::make_shared<ElementSimple>(std::move($4)), $2);
 	}
 	| KW_TAILLE expression expression ';' {
-		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::make_shared<Taille>($2->eval()->toDouble(), $3->eval()->toDouble()), "taille");
+		/* TODO
+		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::make_shared<Taille>(std::move($2), std::move($3)), "taille");
+		*/
 	}
 
 forme:
 	KW_CARRE expression expression expression {
-		$$ = std::make_shared<Carre>($2->eval()->toDouble(), $3->eval()->toDouble(), $4->eval()->toDouble());
+		$$ = std::make_shared<Carre>(std::move($2), std::move($3), std::move($4));
 	}
 	| KW_RECTANGLE expression expression expression expression expression expression expression expression {
-		$$ = std::make_shared<Rectangle>($2->eval()->toDouble(), $3->eval()->toDouble(), $4->eval()->toDouble(),
-						 $5->eval()->toDouble(), $6->eval()->toDouble(), $7->eval()->toDouble(),
-						 $8->eval()->toDouble(), $9->eval()->toDouble());
+		$$ = std::make_shared<Rectangle>(std::move($2), std::move($3), std::move($4), std::move($5), std::move($6), std::move($7), std::move($8), std::move($9));
 	}
 	| KW_TRIANGLE expression expression expression expression {
-		$$ = std::make_shared<Triangle>($2->eval()->toDouble(), $3->eval()->toDouble(), $4->eval()->toDouble(), $5->eval()->toDouble());
+		$$ = std::make_shared<Triangle>(std::move($2), std::move($3), std::move($4), std::move($5));
 	}
 	| KW_CERCLE expression expression expression {
-		$$ = std::make_shared<Cercle>($2->eval()->toDouble(), $3->eval()->toDouble(), $4->eval()->toDouble());
+		$$ = std::make_shared<Cercle>(std::move($2), std::move($3), std::move($4));
 	}
 	| KW_ELLIPSE expression expression expression expression {
-		$$ = std::make_shared<Ellipse>($2->eval()->toDouble(), $3->eval()->toDouble(), $4->eval()->toDouble(), $5->eval()->toDouble());
+		$$ = std::make_shared<Ellipse>(std::move($2), std::move($3), std::move($4), std::move($5));
 	}
 	| KW_LIGNE expression expression expression expression {
-		$$ = std::make_shared<Ligne>($2->eval()->toDouble(), $3->eval()->toDouble(), $4->eval()->toDouble(), $5->eval()->toDouble());
+		$$ = std::make_shared<Ligne>(std::move($2), std::move($3), std::move($4), std::move($5));
 	}
 	| KW_CHEMIN chemin_points {
 		$$ = std::move($2);
 	}
 	| KW_TEXTE expression expression STRING STRING {
 		// TODO: Utiliser des expressions pour texte + nom de police
-		$$ = std::make_shared<Texte>($2->eval()->toDouble(), $3->eval()->toDouble(), $4, $5);
+		$$ = std::make_shared<Texte>(std::move($2), std::move($3), $4, $5);
 	}
 
 chemin_points:
 	chemin_points ',' expression expression  {
 		$$ = std::move($1);
-		$$->ajoutePoint($3->eval()->toDouble(), $4->eval()->toDouble());
+		$$->ajoutePoint(std::move($3), std::move($4));
 	}
 	| expression expression {
-		$$ = std::make_unique<Chemin>($1->eval()->toDouble(), $2->eval()->toDouble());
+		$$ = std::make_unique<Chemin>(std::move($1), std::move($2));
 	}
 
 proplist_esp:
@@ -419,24 +418,24 @@ propriete:
 
 propriete_couleur:
 	KW_COULEUR ':' couleur {
-		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Couleur, *$3);
+		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Couleur, std::make_shared<Constante>(std::move($3)));
 	}
 	| KW_REMPLISSAGE ':' couleur {
-		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Remplissage, *$3);
+		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Remplissage, std::make_shared<Constante>(std::move($3)));
 	}
 
 propriete_float:
 	KW_OPACITE ':' expression '%' {
-		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Opacite, $3->eval()->toDouble() * .01f);
+		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Opacite, std::move($3));
 	}
 	| KW_ROTATION ':' expression DEGREE {
-		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Rotation, fmod($3->eval()->toDouble(), 360.0f));
+		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Rotation, std::move($3));
 	}
 	| KW_EPAISSEUR ':' expression {
-		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Epaisseur, $3->eval()->toDouble());
+		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Epaisseur, std::move($3));
 	}
 	| KW_TAILLE ':' expression {
-		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Taille, $3->eval()->toDouble());
+		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Taille, std::move($3));
 	}
 
 couleur:
@@ -444,7 +443,7 @@ couleur:
 		$$ = std::make_unique<Couleur>($1);
 	 }
 	 | COULEUR_RGB_START expression ',' expression ',' expression ')' {
-	 	$$ = std::make_unique<Couleur>($2->eval()->toDouble(), $4->eval()->toDouble(), $6->eval()->toDouble());
+	 	$$ = std::make_unique<Couleur>(std::move($2), std::move($4), std::move($6));
 	 }
 	 | COULEUR_HEX {
 	 	$$ = std::make_unique<Couleur>($1);
@@ -458,44 +457,28 @@ affectation:
 		$$ = std::make_unique<AffectationExpression>(driver.contexteCourant, $1, std::move($3));
 	}
 	| KW_CARRE '[' expression ']' '.' affectation_propriete {
-		const auto i = $3->eval()->toDouble();
-		assertEntier(i);
-		$$ = std::make_unique<AffectationPropriete>(driver.contexteCourant, std::string("Carre" + std::to_string(i)), *$6);
+		$$ = std::make_unique<AffectationPropriete>(driver.contexteCourant, "carre", *$6, std::move($3));
 	}
 	| KW_RECTANGLE '[' expression ']' '.' affectation_propriete {
-		const auto i = $3->eval()->toDouble();
-		assertEntier(i);
-		$$ = std::make_unique<AffectationPropriete>(driver.contexteCourant, std::string("Rectangle" + std::to_string(i)), *$6);
+		$$ = std::make_unique<AffectationPropriete>(driver.contexteCourant, "rectangle", *$6, std::move($3));
 	}
 	| KW_TRIANGLE '[' expression ']' '.' affectation_propriete {
-		const auto i = $3->eval()->toDouble();
-		assertEntier(i);
-		$$ = std::make_unique<AffectationPropriete>(driver.contexteCourant, std::string("Triangle" + std::to_string(i)), *$6);
+		$$ = std::make_unique<AffectationPropriete>(driver.contexteCourant, "triangle", *$6, std::move($3));
 	}
 	| KW_CERCLE '[' expression ']' '.' affectation_propriete {
-		const auto i = $3->eval()->toDouble();
-		assertEntier(i);
-		$$ = std::make_unique<AffectationPropriete>(driver.contexteCourant, std::string("Cercle" + std::to_string(i)), *$6);
+		$$ = std::make_unique<AffectationPropriete>(driver.contexteCourant, "cercle", *$6, std::move($3));
 	}
 	| KW_ELLIPSE '[' expression ']' '.' affectation_propriete {
-		const auto i = $3->eval()->toDouble();
-		assertEntier(i);
-		$$ = std::make_unique<AffectationPropriete>(driver.contexteCourant, std::string("Ellipse" + std::to_string(i)), *$6);
+		$$ = std::make_unique<AffectationPropriete>(driver.contexteCourant, "ellipse", *$6, std::move($3));
 	}
 	| KW_LIGNE '[' expression ']' '.' affectation_propriete {
-		const auto i = $3->eval()->toDouble();
-		assertEntier(i);
-		$$ = std::make_unique<AffectationPropriete>(driver.contexteCourant, std::string("Ligne" + std::to_string(i)), *$6);
+		$$ = std::make_unique<AffectationPropriete>(driver.contexteCourant, "ligne", *$6, std::move($3));
 	}
 	| KW_CHEMIN '[' expression ']' '.' affectation_propriete {
-		const auto i = $3->eval()->toDouble();
-		assertEntier(i);
-		$$ = std::make_unique<AffectationPropriete>(driver.contexteCourant, std::string("Chemin" + std::to_string(i)), *$6);
+		$$ = std::make_unique<AffectationPropriete>(driver.contexteCourant, "chemin", *$6, std::move($3));
 	}
 	| KW_TEXTE '[' expression ']' '.' affectation_propriete {
-		const auto i = $3->eval()->toDouble();
-		assertEntier(i);
-		$$ = std::make_unique<AffectationPropriete>(driver.contexteCourant, std::string("Texte" + std::to_string(i)), *$6);
+		$$ = std::make_unique<AffectationPropriete>(driver.contexteCourant, "texte", *$6, std::move($3));
 	}
 
 affectation_propriete:
@@ -508,54 +491,54 @@ affectation_propriete:
 
 affectation_propriete_float:
 	KW_OPACITE OP_AFF expression '%' {
-		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Opacite, $3->eval()->toDouble() * .01f);
+		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Opacite, std::move($3));
 	}
 	| KW_ROTATION OP_AFF expression DEGREE {
-		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Rotation, $3->eval()->toDouble() * .01f);
+		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Rotation, std::move($3));
 	}
 	| KW_EPAISSEUR OP_AFF expression {
-		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Epaisseur, $3->eval()->toDouble());
+		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Epaisseur, std::move($3));
 	}
 	| KW_POSX OP_AFF expression {
-		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Point, $3->eval()->toDouble(), 0, true);
+		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Point, std::move($3), 0);
 	}
 	| KW_POSY OP_AFF expression {
-		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Point, $3->eval()->toDouble(), 0, false);
+		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Point, std::move($3), 1);
 	}
 	| KW_POSX1 OP_AFF expression {
-		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Point, $3->eval()->toDouble(), 0, true);
+		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Point, std::move($3), 0);
 	}
 	| KW_POSY1 OP_AFF expression {
-		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Point, $3->eval()->toDouble(), 0, false);
+		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Point, std::move($3), 1);
 	}
 	| KW_POSX2 OP_AFF expression {
-		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Point, $3->eval()->toDouble(), 1, true);
+		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Point, std::move($3), 2);
 	}
 	| KW_POSY2 OP_AFF expression {
-		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Point, $3->eval()->toDouble(), 1, false);
+		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Point, std::move($3), 3);
 	}
 	| KW_POSX3 OP_AFF expression {
-		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Point, $3->eval()->toDouble(), 2, true);
+		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Point, std::move($3), 4);
 	}
 	| KW_POSY3 OP_AFF expression {
-		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Point, $3->eval()->toDouble(), 2, false);
+		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Point, std::move($3), 5);
 	}
 	| KW_POSX4 OP_AFF expression {
-		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Point, $3->eval()->toDouble(), 3, true);
+		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Point, std::move($3), 6);
 	}
 	| KW_POSY4 OP_AFF expression {
-		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Point, $3->eval()->toDouble(), 3, false);
+		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Point, std::move($3), 7);
 	}
 	| KW_TAILLE OP_AFF expression {
-		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Taille, $3->eval()->toDouble());
+		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Taille, std::move($3));
 	}
 
 affectation_propriete_couleur:
 	KW_COULEUR OP_AFF couleur {
-		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Couleur, *$3);
+		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Couleur, std::make_unique<Constante>(std::move($3)));
 	}
 	| KW_REMPLISSAGE OP_AFF couleur {
-		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Remplissage, *$3);
+		$$ = std::make_unique<Forme::messageSetPropriete>(Forme::Propriete::Remplissage, std::make_unique<Constante>(std::move($3)));
 	}
 
 branchement:
@@ -567,7 +550,7 @@ branchement:
 	}
 
 then:
-	instruction then {
+	instruction NL then {
 		$$.push_back(std::move($1));
 	}
 	| instruction NL {
@@ -577,6 +560,9 @@ then:
 boucle:
 	KW_TANTQUE expression '{' NL then '}' {
 		$$ = std::make_unique<Boucle>(driver.contexteCourant, std::move($2), $5);
+	}
+	| KW_REPETE expression KW_FOIS '{' NL then '}' {
+		$$ = std::make_unique<Boucle>(driver.contexteCourant, std::move($2), $6, true);
 	}
 
 appelFonction:

@@ -4,65 +4,64 @@
 #include <string>
 #include <vector>
 
-#include "../Couleur.h"
 #include "../Element.h"
-#include "../ElementPrimitif.h"
+#include "../../expressions/Expression.h"
 
 class Forme: public Element {
 public:
-	struct Point
+	enum class Propriete
 	{
-		ElementPrimitif<double> x= 0, y = 0;
-	};
-
-	Couleur _couleur;
-	Couleur _remplissage;
-	ElementPrimitif<double> _opacite = 0;
-	ElementPrimitif<double> _rotation = 0;
-	ElementPrimitif<double> _epaisseur = 0;
-	std::vector<Point> _points;
-
-	static constexpr uint8_t enumProprieteFloatStart = 10;
-	static constexpr uint8_t enumProprieteCouleurStart = 1;
-	enum class Propriete: uint8_t {
-		Point,
-		Couleur = enumProprieteCouleurStart,
+		Couleur,
 		Remplissage,
-		Opacite = enumProprieteFloatStart,
+		Opacite,
 		Rotation,
 		Epaisseur,
 		Taille,
+		Point,
 	};
-	static bool isFloatPropriete(Propriete p) noexcept { return static_cast<int>(p) >= enumProprieteFloatStart; }
-	static bool isCouleurPropriete(Propriete p) noexcept;
+
+	static constexpr int8_t _proprietesStandardCount = 5;
+	std::array<std::shared_ptr<Expression>, _proprietesStandardCount> _proprietesStandard;
+	std::shared_ptr<Expression> getPropriete(Propriete p, int indexPoint = -1);
+
+	static constexpr const char* _proprietesNoms[_proprietesStandardCount + 1] = {
+		"couleur",
+		"remplissage",
+		"opacite",
+		"rotation",
+		"epaisseur",
+		"taille"
+	};
+	static std::string nomPropriete(Propriete p) { return _proprietesNoms[static_cast<int8_t>(p)]; }
+
+	std::vector<std::shared_ptr<Expression>> _points;
+
+	std::shared_ptr<Expression> couleur() const noexcept { return _proprietesStandard[static_cast<int8_t>(Propriete::Couleur)]; }
+	std::shared_ptr<Expression> remplissage() const noexcept { return _proprietesStandard[static_cast<int8_t>(Propriete::Remplissage)]; }
+	std::shared_ptr<Expression> opacite() const noexcept { return _proprietesStandard[static_cast<int8_t>(Propriete::Opacite)]; }
+	std::shared_ptr<Expression> rotation() const noexcept { return _proprietesStandard[static_cast<int8_t>(Propriete::Rotation)]; }
+	std::shared_ptr<Expression> epaisseur() const noexcept { return _proprietesStandard[static_cast<int8_t>(Propriete::Epaisseur)]; }
 
 	struct messageSetPropriete
 	{
-		Forme::Propriete propriete;
-		union
-		{
-			Couleur c;
-			double f;
-			struct {
-				double val;
-				int ind;
-				bool isX;
-			} pointData;
-		};
+		Propriete propriete;
+		std::shared_ptr<Expression> valeure;
+		int8_t indexPoint;
 
-		messageSetPropriete(Forme::Propriete p, const Couleur &col): propriete(p), c(col) {};
-		messageSetPropriete(Forme::Propriete p, const double &flt): propriete(p), f(flt) {};
-		messageSetPropriete(Forme::Propriete p, double v, int i, bool x): propriete(p) { pointData.val = v; pointData.ind = i; pointData.isX = x; };
-		messageSetPropriete(const messageSetPropriete &p);
+		messageSetPropriete(Propriete p, const std::shared_ptr<Expression> &val, int8_t index = -1)
+			: propriete(p), valeure(val), indexPoint(index) {}
 	};
-	void setPropriete(const messageSetPropriete &m) noexcept;
+	virtual void recevoirMessage(const messageSetPropriete &m);
 
 	virtual std::string to_svg() const = 0;
 	virtual double toDouble() const noexcept override;
 	virtual Type type() const noexcept override = 0;
 
 	std::string proprietes_svg() const;
+
+	struct Point
+	{
+		double x, y;
+	};
 	virtual Point centre() const = 0;
 };
-
-using FormePtr = std::shared_ptr<Forme>;

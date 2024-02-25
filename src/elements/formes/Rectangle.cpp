@@ -3,10 +3,10 @@
 std::string Rectangle::to_svg() const {
     return std::string("<polygon ")
 		+ "points=\""
-        + std::to_string(_coordonnees[0]) + ',' + std::to_string(_coordonnees[1]) + ' '
-        + std::to_string(_coordonnees[2]) + ',' + std::to_string(_coordonnees[3]) + ' '
-        + std::to_string(_coordonnees[4]) + ',' + std::to_string(_coordonnees[5]) + ' '
-        + std::to_string(_coordonnees[6]) + ',' + std::to_string(_coordonnees[7])
+        + std::to_string(_points[0]->eval()->toDouble()) + ',' + std::to_string(_points[1]->eval()->toDouble()) + ' '
+        + std::to_string(_points[2]->eval()->toDouble()) + ',' + std::to_string(_points[3]->eval()->toDouble()) + ' '
+        + std::to_string(_points[4]->eval()->toDouble()) + ',' + std::to_string(_points[5]->eval()->toDouble()) + ' '
+        + std::to_string(_points[6]->eval()->toDouble()) + ',' + std::to_string(_points[7]->eval()->toDouble())
         + "\" "
 		+ proprietes_svg()
 		+ "/>";
@@ -16,8 +16,8 @@ Forme::Point Rectangle::centre() const {
 	Point result { 0, 0 };
 
 	for (int i = 0; i < 8; i += 2) {
-		result.x += _coordonnees[i];
-		result.y += _coordonnees[i+1];
+		result.x += _points[i]->eval()->toDouble();
+		result.y += _points[i+1]->eval()->toDouble();
 	}
 
 	result.x /= 4.;

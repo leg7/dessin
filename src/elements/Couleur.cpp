@@ -43,5 +43,9 @@ double Couleur::toDouble() const noexcept
 
 std::string Couleur::to_string() const noexcept
 {
+	if (_re != nullptr) {
+		Couleur tmp(_re->eval()->toDouble(), _ge->eval()->toDouble(), _be->eval()->toDouble());
+		return "rgb(" + std::to_string(tmp._r) + ", " + std::to_string(tmp._g) + ", " + std::to_string(tmp._b);
+	}
 	return "rgb(" + std::to_string(_r) + ", " + std::to_string(_g) + ", " + std::to_string(_b);
 }

@@ -1,5 +1,4 @@
 #include "ExpressionUnaire.h"
-#include "../elements/ElementPrimitif.h"
 
 std::shared_ptr<Element> ExpressionUnaire::eval() const noexcept
 {
@@ -9,6 +8,6 @@ std::shared_ptr<Element> ExpressionUnaire::eval() const noexcept
 		case Operation::MIN: result = -_operande->eval()->toDouble(); break;
 		case Operation::NOOP: result = _operande->eval()->toDouble();
 	}
-	return std::make_shared<ElementPrimitif<double>>(result);
+	return nullptr;
 }
 

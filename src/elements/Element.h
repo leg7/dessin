@@ -17,9 +17,10 @@ class Element
 		Rectangle,
 		Texte,
 		Triangle,
-		ElementPrimitf = enumTypeFormeEnd,
+		ElementSimple = enumTypeFormeEnd,
 		Couleur,
 		Taille,
+		Point,
 	};
 	static constexpr const char* nomFormes[nombreDeFormes] = { "carre", "rectangle", "triangle", "cercle", "ellipse", "ligne", "chemin", "texte" };
 	static bool isFormeType(Type t) noexcept { return static_cast<int>(t) < enumTypeFormeEnd; }

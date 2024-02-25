@@ -1,31 +1,28 @@
 #include "Carre.h"
 
+void Carre::recevoirMessage(const messageSetPropriete &m)
+{
+	if (m.propriete == Propriete::Taille) {
+		_taille = m.valeure;
+	} else {
+		Forme::recevoirMessage(m);
+	}
+}
+
 std::string Carre::to_svg() const {
 	return std::string("<rect ")
-		+ "x=\"" + std::to_string(_points[0].x.toDouble()) + "\" "
-		+ "y=\"" + std::to_string(_points[0].y.toDouble()) + "\" "
-		+ "width=\"" + std::to_string(_taille.toDouble()) + "\" "
-		+ "height=\"" + std::to_string(_taille.toDouble()) + "\" "
+		+ "x=\"" + std::to_string(_points[0]->eval()->toDouble()) + "\" "
+		+ "y=\"" + std::to_string(_points[0]->eval()->toDouble()) + "\" "
+		+ "width=\"" + std::to_string(_taille->eval()->toDouble()) + "\" "
+		+ "height=\"" + std::to_string(_taille->eval()->toDouble()) + "\" "
 		+ proprietes_svg()
 		+ "/>";
 }
 
 
-// Pareil que dans Forme mais supporte l'attribut taille
-void Carre::setPropriete(const messageSetPropriete &m) noexcept
-{
-	switch (m.propriete) {
-		case Propriete::Point: if (m.pointData.isX) _points[m.pointData.ind].x = m.pointData.val; else _points[m.pointData.ind].y = m.pointData.val; break;
-		case Propriete::Opacite: _opacite = m.f; break;
-		case Propriete::Rotation: _rotation = m.f; break;
-		case Propriete::Epaisseur: _epaisseur = m.f; break;
-		case Propriete::Couleur: _couleur = m.c; break;
-		case Propriete::Remplissage: _remplissage = m.c; break;
-		case Propriete::Taille: _taille = m.f; break;
-		default: exit(69);
-	}
-}
-
 Forme::Point Carre::centre() const {
-	return Point { _points[0].x.toDouble() + _taille.toDouble() * .5, _points[0].y.toDouble() + _taille.toDouble() * .5 };
+	return Point {
+		_points[0]->eval()->toDouble() + _taille->eval()->toDouble() * .5,
+		_points[1]->eval()->toDouble() + _taille->eval()->toDouble() * .5
+	};
 }

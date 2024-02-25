@@ -22,5 +22,7 @@ class Contexte
 
 	std::shared_ptr<Forme> getForme(const Element::Type t, const int num) noexcept;
 	void addForme(const std::shared_ptr<Forme> &f) noexcept;
+
+	void to_svg() const noexcept;
 };
 
