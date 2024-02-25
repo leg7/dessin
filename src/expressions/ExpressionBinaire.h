@@ -12,6 +12,7 @@ class ExpressionBinaire: public Expression
 		MUL,
 		DIV,
 		EQ,
+		NE,
 		GT,
 		GE,
 		LT,

@@ -41,6 +41,7 @@ class Couleur: public Element
 
 	  Couleur(const Couleur &c) noexcept = default;
 	  Couleur& operator=(const Couleur &c) noexcept = default;
+	  // TODO: operateur comparaison
 
 	  std::string to_string() const noexcept;
 	  virtual double toDouble() const noexcept override;

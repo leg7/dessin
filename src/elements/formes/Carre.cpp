@@ -2,10 +2,10 @@
 
 std::string Carre::to_svg() const {
 	return std::string("<rect ")
-		+ "x=\"" + std::to_string(_points[0].x) + "\" "
-		+ "y=\"" + std::to_string(_points[0].y) + "\" "
-		+ "width=\"" + std::to_string(_taille) + "\" "
-		+ "height=\"" + std::to_string(_taille) + "\" "
+		+ "x=\"" + std::to_string(_points[0].x.toDouble()) + "\" "
+		+ "y=\"" + std::to_string(_points[0].y.toDouble()) + "\" "
+		+ "width=\"" + std::to_string(_taille.toDouble()) + "\" "
+		+ "height=\"" + std::to_string(_taille.toDouble()) + "\" "
 		+ proprietes_svg()
 		+ "/>";
 }
@@ -27,5 +27,5 @@ void Carre::setPropriete(const messageSetPropriete &m) noexcept
 }
 
 Forme::Point Carre::centre() const {
-	return Point { _points[0].x + _taille * .5, _points[0].y + _taille * .5 };
+	return Point { _points[0].x.toDouble() + _taille.toDouble() * .5, _points[0].y.toDouble() + _taille.toDouble() * .5 };
 }

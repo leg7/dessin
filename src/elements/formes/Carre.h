@@ -10,7 +10,6 @@ class Carre: public Forme {
 		std::string to_svg() const override;
 		void setPropriete(const messageSetPropriete &m) noexcept;
 
-	protected:
+		ElementPrimitif<double> _taille;
 		Point centre() const override;
-		double _taille;
 };

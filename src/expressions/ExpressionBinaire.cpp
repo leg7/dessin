@@ -11,6 +11,7 @@ std::shared_ptr<Element> ExpressionBinaire::eval() const noexcept
 		case Operation::MUL: result = _gauche->eval()->toDouble() * _droite->eval()->toDouble(); break;
 		case Operation::DIV: result = _gauche->eval()->toDouble() / _droite->eval()->toDouble(); break;
 		case Operation::EQ:  result = _gauche->eval()->toDouble() == _droite->eval()->toDouble(); break;
+		case Operation::NE:  result = _gauche->eval()->toDouble() != _droite->eval()->toDouble(); break;
 		case Operation::GT:  result = _gauche->eval()->toDouble() > _droite->eval()->toDouble(); break;
 		case Operation::GE:  result = _gauche->eval()->toDouble() >= _droite->eval()->toDouble(); break;
 		case Operation::LT:  result = _gauche->eval()->toDouble() < _droite->eval()->toDouble(); break;

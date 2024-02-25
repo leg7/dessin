@@ -11,4 +11,7 @@ class ElementPrimitif: public Element
 		T val() const noexcept { return _val; }
 		virtual double toDouble() const noexcept override { return static_cast<double>(_val); }
 		virtual Type type() const noexcept override { return Type::ElementPrimitf; }
+
+		ElementPrimitif<T>& operator +=(const ElementPrimitif<T> &e) { _val += e.val(); return *this; }
+		ElementPrimitif<T>& operator /=(const ElementPrimitif<T> &e) { _val /= e.val(); return *this; }
 };

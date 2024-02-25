@@ -42,9 +42,9 @@ std::string Forme::proprietes_svg() const {
 	Point c = centre();
 	return "stroke=\"" + _couleur.to_string() + "\" "
 		+ "fill=\"" + _remplissage.to_string() + "\" "
-		+ "stroke-opacity=\"" + std::to_string(_opacite) + "\" "
-		+ "fill-opacity=\"" + std::to_string(_opacite) + "\" "
-		+ "stroke-width=\"" + std::to_string(_epaisseur) + "\" "
-		+ "transform=\"rotate(" + std::to_string(_rotation) + "," + std::to_string(c.x) + "," + std::to_string(c.y) + ")\" "
+		+ "stroke-opacity=\"" + std::to_string(_opacite.toDouble()) + "\" "
+		+ "fill-opacity=\"" + std::to_string(_opacite.toDouble()) + "\" "
+		+ "stroke-width=\"" + std::to_string(_epaisseur.toDouble()) + "\" "
+		+ "transform=\"rotate(" + std::to_string(_rotation.toDouble()) + "," + std::to_string(c.x.toDouble()) + "," + std::to_string(c.y.toDouble()) + ")\" "
 		;
 }

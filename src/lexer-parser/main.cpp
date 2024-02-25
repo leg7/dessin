@@ -11,6 +11,8 @@ int main( int  argc, char* argv[]) {
 	Scanner * scanner = new Scanner(std::cin, std::cout);
 	yy::Parser * parser = new yy::Parser(*scanner, *driver);
 
+	driver->ast.executer();
+
 	parser->parse();
 
 	return 0;

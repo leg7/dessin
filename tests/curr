@@ -1,2 +1,5 @@
 carre 0 0 50 -> opacite: 3% & couleur: rouge;
+si (C1.positionY >= 3) alors {
+	C1.taille = 2;
+}
 fin

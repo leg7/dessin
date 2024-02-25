@@ -18,8 +18,9 @@ class Contexte
 	bool rm(const std::string &nom) noexcept;
 	bool contains(const std::string &key) const noexcept;
 	std::shared_ptr<Element> at(const std::string key) const noexcept;
+	std::shared_ptr<Forme> atForme(const std::string key) const;
 
 	std::shared_ptr<Forme> getForme(const Element::Type t, const int num) noexcept;
-	std::shared_ptr<Forme> addForme(const std::shared_ptr<Forme> &f) noexcept;
+	void addForme(const std::shared_ptr<Forme> &f) noexcept;
 };
 

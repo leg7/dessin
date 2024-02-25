@@ -80,6 +80,11 @@ fin return token::END;
 (?i:entier) return token::KW_ENTIER;
 (?i:reel)|(?i:réel) return token::KW_REEL;
 
+(?i:si) return token::KW_SI;
+(?i:alors) return token::KW_ALORS;
+(?i:sinon) return token::KW_SINON;
+
+"=" return token::OP_AFF;
 
 "+" {
 	yylval->build<ExpressionBinaire::Operation>(ExpressionBinaire::Operation::ADD);
@@ -96,7 +101,11 @@ fin return token::END;
 	yylval->build<ExpressionBinaire::Operation>(ExpressionBinaire::Operation::DIV);
 	return token::OP_DIV;
 }
-"=" {
+"=="|(?i:est) {
+	yylval->build<ExpressionBinaire::Operation>(ExpressionBinaire::Operation::EQ);
+	return token::OP_EQ;
+}
+"!="|(?i:n'est\ pas) {
 	yylval->build<ExpressionBinaire::Operation>(ExpressionBinaire::Operation::EQ);
 	return token::OP_EQ;
 }
@@ -128,7 +137,6 @@ fin return token::END;
 	yylval->build<ExpressionUnaire::Operation>(ExpressionUnaire::Operation::NEG);
 	return token::OP_NEG;
 }
-
 
 
 
