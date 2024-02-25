@@ -24,10 +24,10 @@
 	#include "../instructions/Instruction.h"
 	#include "../instructions/AffectationExpression.h"
 	#include "../instructions/AffectationPropriete.h"
-	#include "../instructions/AppelFonction.h"
 	#include "../instructions/Boucle.h"
 	#include "../instructions/Branchement.h"
 	#include "../instructions/Declaration.h"
+	#include "../instructions/AppelFonction.h"
 
 	#include "../elements/Taille.h"
 	#include "../elements/Couleur.h"
@@ -41,6 +41,7 @@
 	#include "../elements/formes/Rectangle.h"
 	#include "../elements/formes/Texte.h"
 	#include "../elements/formes/Triangle.h"
+	#include "../elements/Fonction.h"
 
 	class Scanner;
 	class Driver;
@@ -89,6 +90,7 @@
 %token KW_POSY4
 %token KW_LARGEUR
 %token KW_HAUTEUR
+%token KW_FONCTION
 
 %token KW_BOOLEAN
 %token KW_ENTIER
@@ -135,7 +137,7 @@
 %type <std::unique_ptr<Expression>> expression
 
 %type <std::unique_ptr<Declaration>> declaration
-%type <std::shared_ptr<Forme>> forme
+%type <std::unique_ptr<Forme>> forme
 %type <std::unique_ptr<Chemin>> chemin_points
 %type <std::unique_ptr<Forme::messageSetPropriete>> proplist_esp
 %type <std::unique_ptr<Forme::messageSetPropriete>> proplist_nl
@@ -154,8 +156,10 @@
 %type <std::vector<std::shared_ptr<Instruction>>> then
 
 %type <std::unique_ptr<Boucle>> boucle
-%type <std::unique_ptr<AppelFonction>> appelFonction
-%type <std::vector<std::shared_ptr<Instruction>>> arglist
+
+%type <std::vector<std::string>> arglist
+%type <std::unique_ptr<AppelFonction>> appel_fonction
+%type <std::vector<std::shared_ptr<Expression>>> argvals
 %%
 
 
@@ -167,22 +171,20 @@ programme:
 	}
 
 instruction:
-/*
-	| appelFonction {
-		driver.ast.add($$);
+	appel_fonction {
+		driver.ast.add(std::move($1));
 	}
-*/
-	branchement {
-		driver.ast.add(std::move($$));
+	| branchement {
+		driver.ast.add(std::move($1));
 	}
 	| declaration {
-		driver.ast.add(std::move($$));
+		driver.ast.add(std::move($1));
 	}
 	| affectation ';' {
-		driver.ast.add(std::move($$));
+		driver.ast.add(std::move($1));
 	}
 	| boucle {
-		driver.ast.add(std::move($$));
+		driver.ast.add(std::move($1));
 	}
 
 expression:
@@ -338,32 +340,35 @@ declaration:
 		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::make_shared<Taille>(std::move($2), std::move($3)), "taille");
 		*/
 	}
+	| KW_FONCTION IDENTIFIANT '(' arglist ')' '{' NL then '}' {
+		$$ = std::make_unique<Declaration>(driver.contexteCourant, std::make_shared<Fonction>(driver.contexteCourant, std::move($4), $8));
+	}
 
 forme:
 	KW_CARRE expression expression expression {
-		$$ = std::make_shared<Carre>(std::move($2), std::move($3), std::move($4));
+		$$ = std::make_unique<Carre>(std::move($2), std::move($3), std::move($4));
 	}
 	| KW_RECTANGLE expression expression expression expression expression expression expression expression {
-		$$ = std::make_shared<Rectangle>(std::move($2), std::move($3), std::move($4), std::move($5), std::move($6), std::move($7), std::move($8), std::move($9));
+		$$ = std::make_unique<Rectangle>(std::move($2), std::move($3), std::move($4), std::move($5), std::move($6), std::move($7), std::move($8), std::move($9));
 	}
 	| KW_TRIANGLE expression expression expression expression {
-		$$ = std::make_shared<Triangle>(std::move($2), std::move($3), std::move($4), std::move($5));
+		$$ = std::make_unique<Triangle>(std::move($2), std::move($3), std::move($4), std::move($5));
 	}
 	| KW_CERCLE expression expression expression {
-		$$ = std::make_shared<Cercle>(std::move($2), std::move($3), std::move($4));
+		$$ = std::make_unique<Cercle>(std::move($2), std::move($3), std::move($4));
 	}
 	| KW_ELLIPSE expression expression expression expression {
-		$$ = std::make_shared<Ellipse>(std::move($2), std::move($3), std::move($4), std::move($5));
+		$$ = std::make_unique<Ellipse>(std::move($2), std::move($3), std::move($4), std::move($5));
 	}
 	| KW_LIGNE expression expression expression expression {
-		$$ = std::make_shared<Ligne>(std::move($2), std::move($3), std::move($4), std::move($5));
+		$$ = std::make_unique<Ligne>(std::move($2), std::move($3), std::move($4), std::move($5));
 	}
 	| KW_CHEMIN chemin_points {
 		$$ = std::move($2);
 	}
 	| KW_TEXTE expression expression STRING STRING {
 		// TODO: Utiliser des expressions pour texte + nom de police
-		$$ = std::make_shared<Texte>(std::move($2), std::move($3), $4, $5);
+		$$ = std::make_unique<Texte>(std::move($2), std::move($3), $4, $5);
 	}
 
 chemin_points:
@@ -548,26 +553,26 @@ boucle:
 		$$ = std::make_unique<Boucle>(driver.contexteCourant, std::move($2), $6, true);
 	}
 
-appelFonction:
-/*
-	IDENTIFIANT '(' ')' {
-		$$ = std::make_unique<AppelFonction>(driver.contexteCourant);
-	}
-	IDENTIFIANT '(' arglist ')' {
-		$$ = std::make_unique<AppelFonction>(driver.contexteCourant, $3);
-	}
-*/
-
 arglist:
-/*
-	expression {
-		$$ = std::vector<std::shared_ptr<Expression>>(1, std::move($1));
+	IDENTIFIANT {
+		$$.push_back($1);
 	}
-	| arglist ',' expression {
-		$$ = std::move($1);
-		$$.push_back(std::move($3));
+	| arglist ',' IDENTIFIANT {
+		$$.push_back($3);
 	}
-*/
+
+appel_fonction:
+	IDENTIFIANT argvals {
+		$$ = std::make_unique<AppelFonction>(driver.contexteCourant, $1, $2);
+	}
+
+argvals:
+	 expression {
+	 	$$.push_back(std::move($1));
+	 }
+	 | expression argvals {
+		$$.push_back(std::move($1));
+	 }
 
 
 %%

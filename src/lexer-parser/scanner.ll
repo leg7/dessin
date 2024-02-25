@@ -80,6 +80,7 @@ fin return token::END;
 (?i:tant\ que\ ) return token::KW_TANTQUE;
 (?i:répète)|(?i:repete) return token::KW_REPETE;
 (?i:fois) return token::KW_FOIS;
+(?i:fonction) return token::KW_FONCTION;
 
 (?i:booleen)|(?i:booléen) return token::KW_BOOLEAN;
 (?i:entier) return token::KW_ENTIER;

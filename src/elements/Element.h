@@ -18,6 +18,7 @@ class Element
 		Texte,
 		Triangle,
 		ElementSimple = enumTypeFormeEnd,
+		Fonction,
 		Couleur,
 		Taille,
 		Point,

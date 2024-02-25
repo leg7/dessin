@@ -14,9 +14,9 @@ int main( int  argc, char* argv[]) {
 
 	parser->parse();
 
+
 	driver->ast.executer();
-	// driver->contexteCourant->to_svg();
-	std::cout << "done\n";
+	driver->contexteCourant->to_svg();
 
 	return 0;
 }
